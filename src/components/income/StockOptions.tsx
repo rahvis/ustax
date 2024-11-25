@@ -1,20 +1,20 @@
-import { ReactElement, ReactNode } from 'react'
-import { Helmet } from 'react-helmet'
-import { useForm, FormProvider } from 'react-hook-form'
-import { TaxesState, useSelector, useDispatch } from 'ustaxes/redux'
-import { addF3921, editF3921, removeF3921 } from 'ustaxes/redux/actions'
-import { usePager } from 'ustaxes/components/pager'
+import { ReactElement, ReactNode } from "react";
+import { Helmet } from "react-helmet";
+import { useForm, FormProvider } from "react-hook-form";
+import { TaxesState, useSelector, useDispatch } from "ustaxes/redux";
+import { addF3921, editF3921, removeF3921 } from "ustaxes/redux/actions";
+import { usePager } from "ustaxes/components/pager";
 import {
   LabeledInput,
   GenericLabeledDropdown,
-  formatSSID
-} from 'ustaxes/components/input'
-import { Patterns } from 'ustaxes/components/Patterns'
-import { FormListContainer } from 'ustaxes/components/FormContainer'
-import { Currency } from 'ustaxes/components/input'
-import { Grid, Box } from '@material-ui/core'
-import { Alert } from '@material-ui/lab'
-import { ShowChartOutlined as StockIcon } from '@material-ui/icons'
+  formatSSID,
+} from "ustaxes/components/input";
+import { Patterns } from "ustaxes/components/Patterns";
+import { FormListContainer } from "ustaxes/components/FormContainer";
+import { Currency } from "ustaxes/components/input";
+import { Grid, Box } from "@material-ui/core";
+import { Alert } from "@material-ui/lab";
+import { ShowChartOutlined as StockIcon } from "@material-ui/icons";
 import {
   F3921,
   FilingStatus,
@@ -22,25 +22,25 @@ import {
   Person,
   PersonRole,
   PrimaryPerson,
-  Spouse
-} from 'ustaxes/core/data'
-import { intentionallyFloat } from 'ustaxes/core/util'
+  Spouse,
+} from "ustaxes/core/data";
+import { intentionallyFloat } from "ustaxes/core/util";
 
 interface F3921UserInput {
-  name: string
-  personRole: PersonRole.PRIMARY | PersonRole.SPOUSE
-  exercisePricePerShare?: string
-  fmv?: string
-  numShares?: string
+  name: string;
+  personRole: PersonRole.PRIMARY | PersonRole.SPOUSE;
+  exercisePricePerShare?: string;
+  fmv?: string;
+  numShares?: string;
 }
 
 const blankUserInput: F3921UserInput = {
-  name: '',
+  name: "",
   personRole: PersonRole.PRIMARY,
-  exercisePricePerShare: '',
-  fmv: '',
-  numShares: ''
-}
+  exercisePricePerShare: "",
+  fmv: "",
+  numShares: "",
+};
 
 const toUserInput = (f: F3921): F3921UserInput => ({
   ...blankUserInput,
@@ -48,66 +48,66 @@ const toUserInput = (f: F3921): F3921UserInput => ({
   personRole: f.personRole,
   exercisePricePerShare: f.exercisePricePerShare.toString(),
   fmv: f.fmv.toString(),
-  numShares: f.numShares.toString()
-})
+  numShares: f.numShares.toString(),
+});
 
 const toF3921 = (input: F3921UserInput): F3921 | undefined => {
-  const { name, personRole, exercisePricePerShare, fmv, numShares } = input
-  if (name === '') {
-    return undefined
+  const { name, personRole, exercisePricePerShare, fmv, numShares } = input;
+  if (name === "") {
+    return undefined;
   }
   return {
     name,
     personRole: personRole,
     exercisePricePerShare: Number(exercisePricePerShare),
     fmv: Number(fmv),
-    numShares: Number(numShares)
-  }
-}
+    numShares: Number(numShares),
+  };
+};
 
 export const StockOptions = (): ReactElement => {
-  const defaultValues = blankUserInput
+  const defaultValues = blankUserInput;
   const information: Information = useSelector(
     (state: TaxesState) => state.information
-  )
-  const f3921s = information.f3921s
+  );
+  const f3921s = information.f3921s;
   const spouseF3921s = f3921s.filter(
     (f3921) => f3921.personRole === PersonRole.SPOUSE
-  )
+  );
 
-  const spouse: Spouse | undefined = information.taxPayer.spouse
+  const spouse: Spouse | undefined = information.taxPayer.spouse;
 
-  const primary: PrimaryPerson | undefined = information.taxPayer.primaryPerson
+  const primary: PrimaryPerson | undefined = information.taxPayer.primaryPerson;
 
   const filingStatus: FilingStatus | undefined =
-    information.taxPayer.filingStatus
+    information.taxPayer.filingStatus;
 
   // People for employee selector
   const people: Person[] = [primary, spouse].flatMap((p) =>
     p !== undefined ? [p as Person] : []
-  )
+  );
 
-  const methods = useForm<F3921UserInput>({ defaultValues })
-  const { handleSubmit } = methods
-  const dispatch = useDispatch()
+  const methods = useForm<F3921UserInput>({ defaultValues });
+  const { handleSubmit } = methods;
+  const dispatch = useDispatch();
 
-  const { onAdvance, navButtons } = usePager()
+  const { onAdvance, navButtons } = usePager();
 
   const onSubmitAdd = (formData: F3921UserInput): void => {
-    const payload = toF3921(formData)
+    const payload = toF3921(formData);
     if (payload !== undefined) {
-      dispatch(addF3921(payload))
+      dispatch(addF3921(payload));
     }
-  }
+  };
 
   const onSubmitEdit =
     (index: number) =>
     (formData: F3921UserInput): void => {
-      const payload = toF3921(formData)
+      const payload = toF3921(formData);
       if (payload !== undefined) {
-        dispatch(editF3921({ value: payload, index }))
+        dispatch(editF3921({ value: payload, index }));
       }
-    }
+    };
 
   const form: ReactElement | undefined = (
     <FormListContainer<F3921UserInput>
@@ -119,18 +119,18 @@ export const StockOptions = (): ReactElement => {
       icon={() => <StockIcon />}
       primary={(f) => f.name}
       secondary={(f) => {
-        const f3921 = toF3921(f)
-        if (f3921 === undefined) return ''
+        const f3921 = toF3921(f);
+        if (f3921 === undefined) return "";
         return (
           <span>
-            {f3921.numShares} shares @{' '}
-            <Currency plain={true} value={f3921.exercisePricePerShare} />;{' '}
+            {f3921.numShares} shares @{" "}
+            <Currency plain={true} value={f3921.exercisePricePerShare} />;{" "}
             <Currency plain={true} value={f3921.fmv} /> FMV
           </span>
-        )
+        );
       }}
     >
-      {' '}
+      {" "}
       <Grid container spacing={2}>
         <h3>Manage Stock Options</h3>
         <LabeledInput label="Company name" name="name" />
@@ -164,7 +164,7 @@ export const StockOptions = (): ReactElement => {
         />
       </Grid>
     </FormListContainer>
-  )
+  );
 
   const spouseF3921Message: ReactNode = (() => {
     if (
@@ -176,15 +176,15 @@ export const StockOptions = (): ReactElement => {
         <div>
           <Box marginBottom={3}>
             <Alert className="inner" severity="warning">
-              Filing status is set to Married Filing Separately.{' '}
+              Filing status is set to Married Filing Separately.{" "}
               <strong>{spouse.firstName}</strong>
               &apos;s F3921s will not be added to the return.
             </Alert>
           </Box>
         </div>
-      )
+      );
     }
-  })()
+  })();
 
   return (
     <FormProvider {...methods}>
@@ -193,7 +193,7 @@ export const StockOptions = (): ReactElement => {
         onSubmit={intentionallyFloat(handleSubmit(onAdvance))}
       >
         <Helmet>
-          <title>Stock Options | Income | UsTaxes.org</title>
+          <title>Stock Options | Income | ITIN Help</title>
         </Helmet>
         <h2>Stock Options</h2>
         <p>If you received Form 3921, enter the information here.</p>
@@ -202,7 +202,7 @@ export const StockOptions = (): ReactElement => {
         {navButtons}
       </form>
     </FormProvider>
-  )
-}
+  );
+};
 
-export default StockOptions
+export default StockOptions;

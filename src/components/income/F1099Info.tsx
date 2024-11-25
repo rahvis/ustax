@@ -1,49 +1,49 @@
-import { ReactElement } from 'react'
-import { Helmet } from 'react-helmet'
-import { Link } from 'react-router-dom'
-import Alert from '@material-ui/lab/Alert'
-import { useForm, FormProvider } from 'react-hook-form'
-import { Icon, Grid } from '@material-ui/core'
-import { useDispatch, useSelector, TaxesState } from 'ustaxes/redux'
-import { add1099, edit1099, remove1099 } from 'ustaxes/redux/actions'
-import { usePager } from 'ustaxes/components/pager'
+import { ReactElement } from "react";
+import { Helmet } from "react-helmet";
+import { Link } from "react-router-dom";
+import Alert from "@material-ui/lab/Alert";
+import { useForm, FormProvider } from "react-hook-form";
+import { Icon, Grid } from "@material-ui/core";
+import { useDispatch, useSelector, TaxesState } from "ustaxes/redux";
+import { add1099, edit1099, remove1099 } from "ustaxes/redux/actions";
+import { usePager } from "ustaxes/components/pager";
 import {
   Person,
   PersonRole,
   Supported1099,
   Income1099Type,
   PlanType1099,
-  PlanType1099Texts
-} from 'ustaxes/core/data'
+  PlanType1099Texts,
+} from "ustaxes/core/data";
 import {
   Currency,
   formatSSID,
   GenericLabeledDropdown,
   LabeledInput,
-  boxLabel
-} from 'ustaxes/components/input'
-import { Patterns } from 'ustaxes/components/Patterns'
-import { FormListContainer } from 'ustaxes/components/FormContainer'
-import { intentionallyFloat } from 'ustaxes/core/util'
+  boxLabel,
+} from "ustaxes/components/input";
+import { Patterns } from "ustaxes/components/Patterns";
+import { FormListContainer } from "ustaxes/components/FormContainer";
+import { intentionallyFloat } from "ustaxes/core/util";
 
 const showIncome = (a: Supported1099): ReactElement => {
   switch (a.type) {
     case Income1099Type.INT: {
-      return <Currency value={a.form.income} />
+      return <Currency value={a.form.income} />;
     }
     case Income1099Type.B: {
-      const ltg = a.form.longTermProceeds - a.form.longTermCostBasis
-      const stg = a.form.shortTermProceeds - a.form.shortTermCostBasis
+      const ltg = a.form.longTermProceeds - a.form.longTermCostBasis;
+      const stg = a.form.shortTermProceeds - a.form.shortTermCostBasis;
       return (
         <span>
           Long term: <Currency value={ltg} />
           <br />
           Short term: <Currency value={stg} />
         </span>
-      )
+      );
     }
     case Income1099Type.DIV: {
-      return <Currency value={a.form.dividends} />
+      return <Currency value={a.form.dividends} />;
     }
     case Income1099Type.R: {
       return (
@@ -54,10 +54,10 @@ const showIncome = (a: Supported1099): ReactElement => {
           <br />
           Taxable Amount: <Currency value={a.form.taxableAmount} />
           <br />
-          Federal Income Tax Withheld:{' '}
+          Federal Income Tax Withheld:{" "}
           <Currency value={a.form.federalIncomeTaxWithheld} />
         </span>
-      )
+      );
     }
     case Income1099Type.SSA: {
       return (
@@ -68,63 +68,63 @@ const showIncome = (a: Supported1099): ReactElement => {
           <br /> */}
           Net Benefits: <Currency value={a.form.netBenefits} />
           <br />
-          Federal Income Tax Withweld:{' '}
+          Federal Income Tax Withweld:{" "}
           <Currency value={a.form.federalIncomeTaxWithheld} />
         </span>
-      )
+      );
     }
   }
-}
+};
 
 interface F1099UserInput {
-  formType: Income1099Type | undefined
-  payer: string
+  formType: Income1099Type | undefined;
+  payer: string;
   // Int fields
-  interest: string | number
+  interest: string | number;
   // B Fields
-  shortTermProceeds: string | number
-  shortTermCostBasis: string | number
-  longTermProceeds: string | number
-  longTermCostBasis: string | number
+  shortTermProceeds: string | number;
+  shortTermCostBasis: string | number;
+  longTermProceeds: string | number;
+  longTermCostBasis: string | number;
   // Div fields
-  dividends: string | number
-  qualifiedDividends: string | number
-  totalCapitalGainsDistributions: string | number
-  personRole?: PersonRole.PRIMARY | PersonRole.SPOUSE
+  dividends: string | number;
+  qualifiedDividends: string | number;
+  totalCapitalGainsDistributions: string | number;
+  personRole?: PersonRole.PRIMARY | PersonRole.SPOUSE;
   // R fields
-  grossDistribution: string | number
-  taxableAmount: string | number
-  federalIncomeTaxWithheld: string | number
-  RPlanType: PlanType1099
+  grossDistribution: string | number;
+  taxableAmount: string | number;
+  federalIncomeTaxWithheld: string | number;
+  RPlanType: PlanType1099;
   // SSA fields
   // benefitsPaid: string | number
   // benefitsRepaid: string | number
-  netBenefits: string | number
+  netBenefits: string | number;
 }
 
 const blankUserInput: F1099UserInput = {
   formType: undefined,
-  payer: '',
-  interest: '',
+  payer: "",
+  interest: "",
   // B Fields
-  shortTermProceeds: '',
-  shortTermCostBasis: '',
-  longTermProceeds: '',
-  longTermCostBasis: '',
+  shortTermProceeds: "",
+  shortTermCostBasis: "",
+  longTermProceeds: "",
+  longTermCostBasis: "",
   // Div fields
-  dividends: '',
-  qualifiedDividends: '',
-  totalCapitalGainsDistributions: '',
+  dividends: "",
+  qualifiedDividends: "",
+  totalCapitalGainsDistributions: "",
   // R fields
-  grossDistribution: '',
-  taxableAmount: '',
-  federalIncomeTaxWithheld: '',
+  grossDistribution: "",
+  taxableAmount: "",
+  federalIncomeTaxWithheld: "",
   RPlanType: PlanType1099.Pension,
   // SSA fields
   // benefitsPaid: '',
   // benefitsRepaid: '',
-  netBenefits: ''
-}
+  netBenefits: "",
+};
 
 const toUserInput = (f: Supported1099): F1099UserInput => ({
   ...blankUserInput,
@@ -136,24 +136,24 @@ const toUserInput = (f: Supported1099): F1099UserInput => ({
     switch (f.type) {
       case Income1099Type.INT: {
         return {
-          interest: f.form.income
-        }
+          interest: f.form.income,
+        };
       }
       case Income1099Type.B: {
-        return f.form
+        return f.form;
       }
       case Income1099Type.DIV: {
-        return f.form
+        return f.form;
       }
       case Income1099Type.R: {
-        return f.form
+        return f.form;
       }
       case Income1099Type.SSA: {
-        return f.form
+        return f.form;
       }
     }
-  })()
-})
+  })(),
+});
 
 const toF1099 = (input: F1099UserInput): Supported1099 | undefined => {
   switch (input.formType) {
@@ -163,9 +163,9 @@ const toF1099 = (input: F1099UserInput): Supported1099 | undefined => {
         personRole: input.personRole ?? PersonRole.PRIMARY,
         type: input.formType,
         form: {
-          income: Number(input.interest)
-        }
-      }
+          income: Number(input.interest),
+        },
+      };
     }
     case Income1099Type.B: {
       return {
@@ -176,9 +176,9 @@ const toF1099 = (input: F1099UserInput): Supported1099 | undefined => {
           shortTermCostBasis: Number(input.shortTermCostBasis),
           shortTermProceeds: Number(input.shortTermProceeds),
           longTermCostBasis: Number(input.longTermCostBasis),
-          longTermProceeds: Number(input.longTermProceeds)
-        }
-      }
+          longTermProceeds: Number(input.longTermProceeds),
+        },
+      };
     }
     case Income1099Type.DIV: {
       return {
@@ -190,9 +190,9 @@ const toF1099 = (input: F1099UserInput): Supported1099 | undefined => {
           qualifiedDividends: Number(input.qualifiedDividends),
           totalCapitalGainsDistributions: Number(
             input.totalCapitalGainsDistributions
-          )
-        }
-      }
+          ),
+        },
+      };
     }
     case Income1099Type.R: {
       return {
@@ -203,9 +203,9 @@ const toF1099 = (input: F1099UserInput): Supported1099 | undefined => {
           grossDistribution: Number(input.grossDistribution),
           taxableAmount: Number(input.taxableAmount),
           federalIncomeTaxWithheld: Number(input.federalIncomeTaxWithheld),
-          planType: PlanType1099.Pension
-        }
-      }
+          planType: PlanType1099.Pension,
+        },
+      };
     }
     case Income1099Type.SSA: {
       return {
@@ -216,48 +216,48 @@ const toF1099 = (input: F1099UserInput): Supported1099 | undefined => {
           // benefitsPaid: Number(input.benefitsPaid),
           // benefitsRepaid: Number(input.benefitsRepaid),
           netBenefits: Number(input.netBenefits),
-          federalIncomeTaxWithheld: Number(input.federalIncomeTaxWithheld)
-        }
-      }
+          federalIncomeTaxWithheld: Number(input.federalIncomeTaxWithheld),
+        },
+      };
     }
   }
-}
+};
 
 export default function F1099Info(): ReactElement {
-  const f1099s = useSelector((state: TaxesState) => state.information.f1099s)
+  const f1099s = useSelector((state: TaxesState) => state.information.f1099s);
 
-  const defaultValues = blankUserInput
+  const defaultValues = blankUserInput;
 
-  const methods = useForm<F1099UserInput>({ defaultValues })
-  const { handleSubmit, watch } = methods
-  const selectedType: Income1099Type | undefined = watch('formType')
+  const methods = useForm<F1099UserInput>({ defaultValues });
+  const { handleSubmit, watch } = methods;
+  const selectedType: Income1099Type | undefined = watch("formType");
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
-  const { onAdvance, navButtons } = usePager()
+  const { onAdvance, navButtons } = usePager();
 
   const onSubmitAdd = (formData: F1099UserInput): void => {
-    const payload = toF1099(formData)
+    const payload = toF1099(formData);
     if (payload !== undefined) {
-      dispatch(add1099(payload))
+      dispatch(add1099(payload));
     }
-  }
+  };
 
   const onSubmitEdit =
     (index: number) =>
     (formData: F1099UserInput): void => {
-      const payload = toF1099(formData)
+      const payload = toF1099(formData);
       if (payload !== undefined) {
-        dispatch(edit1099({ value: payload, index }))
+        dispatch(edit1099({ value: payload, index }));
       }
-    }
+    };
 
   const people: Person[] = useSelector((state: TaxesState) => [
     state.information.taxPayer.primaryPerson,
-    state.information.taxPayer.spouse
+    state.information.taxPayer.spouse,
   ])
     .filter((p) => p !== undefined)
-    .map((p) => p as Person)
+    .map((p) => p as Person);
 
   const intFields = (
     <Grid container spacing={2}>
@@ -271,7 +271,7 @@ export default function F1099Info(): ReactElement {
         name="interest"
       />
     </Grid>
-  )
+  );
 
   const bFields = (
     <>
@@ -306,27 +306,27 @@ export default function F1099Info(): ReactElement {
         />
       </Grid>
     </>
-  )
+  );
 
   const divFields = (
     <Grid container spacing={2}>
       <LabeledInput
-        label={boxLabel('1a', 'Total Dividends')}
+        label={boxLabel("1a", "Total Dividends")}
         patternConfig={Patterns.currency}
         name="dividends"
       />
       <LabeledInput
-        label={boxLabel('1b', 'Qualified Dividends')}
+        label={boxLabel("1b", "Qualified Dividends")}
         patternConfig={Patterns.currency}
         name="qualifiedDividends"
       />
       <LabeledInput
-        label={boxLabel('2a', 'Total capital gains distributions')}
+        label={boxLabel("2a", "Total capital gains distributions")}
         patternConfig={Patterns.currency}
         name="totalCapitalGainsDistributions"
       />
     </Grid>
-  )
+  );
 
   const rFields = (
     <Grid container spacing={2}>
@@ -336,17 +336,17 @@ export default function F1099Info(): ReactElement {
         the <Link to="/savingsaccounts/ira">IRA page</Link>
       </Alert>
       <LabeledInput
-        label={boxLabel('1', 'Gross Distribution')}
+        label={boxLabel("1", "Gross Distribution")}
         patternConfig={Patterns.currency}
         name="grossDistribution"
       />
       <LabeledInput
-        label={boxLabel('2a', 'Taxable Amount')}
+        label={boxLabel("2a", "Taxable Amount")}
         patternConfig={Patterns.currency}
         name="taxableAmount"
       />
       <LabeledInput
-        label={boxLabel('4', 'Federal Income Tax Withheld')}
+        label={boxLabel("4", "Federal Income Tax Withheld")}
         patternConfig={Patterns.currency}
         name="federalIncomeTaxWithheld"
       />
@@ -359,7 +359,7 @@ export default function F1099Info(): ReactElement {
         name="RPlanType"
       />
     </Grid>
-  )
+  );
 
   const ssaFields = (
     <Grid container spacing={2}>
@@ -392,23 +392,23 @@ export default function F1099Info(): ReactElement {
         name="federalIncomeTaxWithheld"
       />
     </Grid>
-  )
+  );
 
   const specificFields = {
     [Income1099Type.INT]: intFields,
     [Income1099Type.B]: bFields,
     [Income1099Type.DIV]: divFields,
     [Income1099Type.R]: rFields,
-    [Income1099Type.SSA]: ssaFields
-  }
+    [Income1099Type.SSA]: ssaFields,
+  };
 
   const titles = {
-    [Income1099Type.INT]: '1099-INT',
-    [Income1099Type.B]: '1099-B',
-    [Income1099Type.DIV]: '1099-DIV',
-    [Income1099Type.R]: '1099-R',
-    [Income1099Type.SSA]: 'SSA-1099'
-  }
+    [Income1099Type.INT]: "1099-INT",
+    [Income1099Type.B]: "1099-B",
+    [Income1099Type.DIV]: "1099-DIV",
+    [Income1099Type.R]: "1099-R",
+    [Income1099Type.SSA]: "SSA-1099",
+  };
 
   const form: ReactElement | undefined = (
     <FormListContainer
@@ -419,11 +419,11 @@ export default function F1099Info(): ReactElement {
       removeItem={(i) => dispatch(remove1099(i))}
       primary={(f) => f.payer}
       secondary={(f) => {
-        const form = toF1099(f)
+        const form = toF1099(f);
         if (form !== undefined) {
-          return showIncome(form)
+          return showIncome(form);
         }
-        return ''
+        return "";
       }}
       icon={(f) => (
         <Icon
@@ -468,7 +468,7 @@ export default function F1099Info(): ReactElement {
         />
       </Grid>
     </FormListContainer>
-  )
+  );
 
   return (
     <FormProvider {...methods}>
@@ -477,12 +477,12 @@ export default function F1099Info(): ReactElement {
         onSubmit={intentionallyFloat(handleSubmit(onAdvance))}
       >
         <Helmet>
-          <title>1099 Information | Income | UsTaxes.org</title>
+          <title>1099 Information | Income | ITIN Help</title>
         </Helmet>
         <h2>1099 Information</h2>
         {form}
         {navButtons}
       </form>
     </FormProvider>
-  )
+  );
 }

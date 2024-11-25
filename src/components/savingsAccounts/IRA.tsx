@@ -1,15 +1,15 @@
-import { ReactElement } from 'react'
-import { Helmet } from 'react-helmet'
-import { useYearSelector, useYearDispatch } from 'ustaxes/redux/yearDispatch'
-import { FormProvider, useForm } from 'react-hook-form'
-import { usePager } from 'ustaxes/components/pager'
+import { ReactElement } from "react";
+import { Helmet } from "react-helmet";
+import { useYearSelector, useYearDispatch } from "ustaxes/redux/yearDispatch";
+import { FormProvider, useForm } from "react-hook-form";
+import { usePager } from "ustaxes/components/pager";
 import {
   Ira,
   IraPlanType,
   IraPlanTypeTexts,
   Person,
-  PersonRole
-} from 'ustaxes/core/data'
+  PersonRole,
+} from "ustaxes/core/data";
 
 import {
   Currency,
@@ -17,54 +17,54 @@ import {
   GenericLabeledDropdown,
   formatSSID,
   LabeledCheckbox,
-  boxLabel
-} from 'ustaxes/components/input'
-import { Patterns } from 'ustaxes/components/Patterns'
-import { FormListContainer } from 'ustaxes/components/FormContainer'
-import { Grid } from '@material-ui/core'
-import { Work } from '@material-ui/icons'
-import { TaxesState } from 'ustaxes/redux'
-import { addIRA, editIRA, removeIRA } from 'ustaxes/redux/actions'
-import { intentionallyFloat } from 'ustaxes/core/util'
+  boxLabel,
+} from "ustaxes/components/input";
+import { Patterns } from "ustaxes/components/Patterns";
+import { FormListContainer } from "ustaxes/components/FormContainer";
+import { Grid } from "@material-ui/core";
+import { Work } from "@material-ui/icons";
+import { TaxesState } from "ustaxes/redux";
+import { addIRA, editIRA, removeIRA } from "ustaxes/redux/actions";
+import { intentionallyFloat } from "ustaxes/core/util";
 
 interface IraUserInput {
-  payer: string
-  personRole: PersonRole.PRIMARY | PersonRole.SPOUSE
+  payer: string;
+  personRole: PersonRole.PRIMARY | PersonRole.SPOUSE;
   // fields about distributions from form 1099-R
-  grossDistribution?: string // 1099-R box 1
-  taxableAmount?: string // 1099-R box 2a
-  taxableAmountNotDetermined?: boolean // 1099-R box 2b
-  totalDistribution?: boolean // 1099-R box 2b
-  federalIncomeTaxWithheld?: string // 1099-R box 4
-  planType: IraPlanType
+  grossDistribution?: string; // 1099-R box 1
+  taxableAmount?: string; // 1099-R box 2a
+  taxableAmountNotDetermined?: boolean; // 1099-R box 2b
+  totalDistribution?: boolean; // 1099-R box 2b
+  federalIncomeTaxWithheld?: string; // 1099-R box 4
+  planType: IraPlanType;
   // fields about contributions from form 5498
-  contributions?: string // 5498 box 1
-  rolloverContributions?: string // 5498 box 2
-  rothIraConversion?: string // 5498 box 3
-  recharacterizedContributions?: string // 5498 box 4
-  requiredMinimumDistributions?: string // 5498 box 12b
-  lateContributions?: string // 5498 box 13a
-  repayments?: string // 5498 box 14a
+  contributions?: string; // 5498 box 1
+  rolloverContributions?: string; // 5498 box 2
+  rothIraConversion?: string; // 5498 box 3
+  recharacterizedContributions?: string; // 5498 box 4
+  requiredMinimumDistributions?: string; // 5498 box 12b
+  lateContributions?: string; // 5498 box 13a
+  repayments?: string; // 5498 box 14a
 }
 
 const blankUserInput: IraUserInput = {
-  payer: '',
+  payer: "",
   personRole: PersonRole.PRIMARY,
-  grossDistribution: '',
-  taxableAmount: '',
+  grossDistribution: "",
+  taxableAmount: "",
   taxableAmountNotDetermined: false,
   totalDistribution: false,
-  federalIncomeTaxWithheld: '',
+  federalIncomeTaxWithheld: "",
   planType: IraPlanType.IRA,
   // fields about contributions from form 5498
-  contributions: '',
-  rolloverContributions: '',
-  rothIraConversion: '',
-  recharacterizedContributions: '',
-  requiredMinimumDistributions: '',
-  lateContributions: '',
-  repayments: ''
-}
+  contributions: "",
+  rolloverContributions: "",
+  rothIraConversion: "",
+  recharacterizedContributions: "",
+  requiredMinimumDistributions: "",
+  lateContributions: "",
+  repayments: "",
+};
 
 const toIra = (formData: IraUserInput): Ira => ({
   ...formData,
@@ -86,8 +86,8 @@ const toIra = (formData: IraUserInput): Ira => ({
   recharacterizedContributions: Number(formData.recharacterizedContributions),
   requiredMinimumDistributions: Number(formData.requiredMinimumDistributions),
   lateContributions: Number(formData.lateContributions),
-  repayments: Number(formData.repayments)
-})
+  repayments: Number(formData.repayments),
+});
 
 const toIraUserInput = (data: Ira): IraUserInput => ({
   ...blankUserInput,
@@ -103,38 +103,38 @@ const toIraUserInput = (data: Ira): IraUserInput => ({
   recharacterizedContributions: data.recharacterizedContributions.toString(),
   requiredMinimumDistributions: data.requiredMinimumDistributions.toString(),
   lateContributions: data.lateContributions.toString(),
-  repayments: data.repayments.toString()
-})
+  repayments: data.repayments.toString(),
+});
 
 export default function IRA(): ReactElement {
-  const defaultValues = blankUserInput
+  const defaultValues = blankUserInput;
   const ira = useYearSelector(
     (state: TaxesState) => state.information.individualRetirementArrangements
-  )
+  );
 
   const people: Person[] = useYearSelector((state: TaxesState) => [
     state.information.taxPayer.primaryPerson,
-    state.information.taxPayer.spouse
+    state.information.taxPayer.spouse,
   ])
     .filter((p) => p !== undefined)
-    .map((p) => p as Person)
+    .map((p) => p as Person);
 
-  const dispatch = useYearDispatch()
+  const dispatch = useYearDispatch();
 
-  const methods = useForm<IraUserInput>({ defaultValues })
-  const { handleSubmit } = methods
+  const methods = useForm<IraUserInput>({ defaultValues });
+  const { handleSubmit } = methods;
 
-  const { navButtons, onAdvance } = usePager()
+  const { navButtons, onAdvance } = usePager();
 
   const onSubmitAdd = (formData: IraUserInput): void => {
-    dispatch(addIRA(toIra(formData)))
-  }
+    dispatch(addIRA(toIra(formData)));
+  };
 
   const onSubmitEdit =
     (index: number) =>
     (formData: IraUserInput): void => {
-      dispatch(editIRA({ index, value: toIra(formData) }))
-    }
+      dispatch(editIRA({ index, value: toIra(formData) }));
+    };
 
   const hsaBlock = (
     <FormListContainer<IraUserInput>
@@ -199,42 +199,42 @@ export default function IRA(): ReactElement {
         />
         <LabeledInput
           name="rolloverContributions"
-          label={boxLabel('2', 'Rollover contributions')}
+          label={boxLabel("2", "Rollover contributions")}
           patternConfig={Patterns.currency}
           required={false}
           sizes={{ xs: 12, lg: 6 }}
         />
         <LabeledInput
           name="rothIraConversion"
-          label={boxLabel('3', 'Amount converted to Roth IRA')}
+          label={boxLabel("3", "Amount converted to Roth IRA")}
           patternConfig={Patterns.currency}
           required={false}
           sizes={{ xs: 12, lg: 6 }}
         />
         <LabeledInput
           name="recharacterizedContributions"
-          label={boxLabel('4', 'Recharacterized contributions')}
+          label={boxLabel("4", "Recharacterized contributions")}
           patternConfig={Patterns.currency}
           required={false}
           sizes={{ xs: 12, lg: 6 }}
         />
         <LabeledInput
           name="requiredMinimumDistributions"
-          label={boxLabel('12b', 'Required minimum distributions')}
+          label={boxLabel("12b", "Required minimum distributions")}
           patternConfig={Patterns.currency}
           required={false}
           sizes={{ xs: 12, lg: 6 }}
         />
         <LabeledInput
           name="lateContributions"
-          label={boxLabel('13a', 'Late contributions')}
+          label={boxLabel("13a", "Late contributions")}
           patternConfig={Patterns.currency}
           required={false}
           sizes={{ xs: 12, lg: 6 }}
         />
         <LabeledInput
           name="repayments"
-          label={boxLabel('14a', 'Repayments to this account')}
+          label={boxLabel("14a", "Repayments to this account")}
           patternConfig={Patterns.currency}
           required={false}
           sizes={{ xs: 12, lg: 6 }}
@@ -249,7 +249,7 @@ export default function IRA(): ReactElement {
       <Grid container spacing={2}>
         <LabeledInput
           name="grossDistribution"
-          label={boxLabel('1', 'Total distributions')}
+          label={boxLabel("1", "Total distributions")}
           patternConfig={Patterns.currency}
           required={false}
           sizes={{ xs: 12, lg: 6 }}
@@ -257,8 +257,8 @@ export default function IRA(): ReactElement {
         <LabeledInput
           name="taxableAmount"
           label={boxLabel(
-            '2a',
-            'This part of the distribution is generally taxable'
+            "2a",
+            "This part of the distribution is generally taxable"
           )}
           patternConfig={Patterns.currency}
           required={false}
@@ -266,7 +266,7 @@ export default function IRA(): ReactElement {
         />
         <LabeledInput
           name="federalIncomeTaxWithheld"
-          label={boxLabel('4a', 'Federal income tax withheld')}
+          label={boxLabel("4a", "Federal income tax withheld")}
           patternConfig={Patterns.currency}
           required={false}
           sizes={{ xs: 12, lg: 6 }}
@@ -281,9 +281,9 @@ export default function IRA(): ReactElement {
         />
       </Grid>
     </FormListContainer>
-  )
+  );
 
-  const form: ReactElement = <>{hsaBlock}</>
+  const form: ReactElement = <>{hsaBlock}</>;
 
   return (
     <FormProvider {...methods}>
@@ -293,8 +293,8 @@ export default function IRA(): ReactElement {
       >
         <Helmet>
           <title>
-            Individual Retirement Arrangements (IRA) | Savings Accounts |
-            UsTaxes.org
+            Individual Retirement Arrangements (IRA) | Savings Accounts | ITIN
+            Help
           </title>
         </Helmet>
         <h2>Individual Retirement Arrangements (IRA)</h2>
@@ -302,5 +302,5 @@ export default function IRA(): ReactElement {
         {navButtons}
       </form>
     </FormProvider>
-  )
+  );
 }

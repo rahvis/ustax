@@ -1,14 +1,14 @@
-import { ReactElement, useEffect, useState } from 'react'
-import { Helmet } from 'react-helmet'
-import { useForm, FormProvider } from 'react-hook-form'
-import { useDispatch, useSelector, TaxesState } from 'ustaxes/redux'
-import { Patterns } from 'ustaxes/components/Patterns'
+import { ReactElement, useEffect, useState } from "react";
+import { Helmet } from "react-helmet";
+import { useForm, FormProvider } from "react-hook-form";
+import { useDispatch, useSelector, TaxesState } from "ustaxes/redux";
+import { Patterns } from "ustaxes/components/Patterns";
 import {
   LabeledInput,
   LabeledCheckbox,
   formatSSID,
-  GenericLabeledDropdown
-} from 'ustaxes/components/input'
+  GenericLabeledDropdown,
+} from "ustaxes/components/input";
 import {
   TaxPayer,
   Dependent,
@@ -16,57 +16,57 @@ import {
   PersonRole,
   FilingStatus,
   FilingStatusTexts,
-  filingStatuses
-} from 'ustaxes/core/data'
+  filingStatuses,
+} from "ustaxes/core/data";
 import {
   addDependent,
   addSpouse,
   editDependent,
   removeDependent,
   removeSpouse,
-  saveFilingStatusInfo
-} from 'ustaxes/redux/actions'
-import { PersonFields } from './PersonFields'
-import { FormListContainer } from 'ustaxes/components/FormContainer'
-import { usePager } from 'ustaxes/components/pager'
-import { Box, Grid } from '@material-ui/core'
-import { Person } from '@material-ui/icons'
-import { Alert } from '@material-ui/lab'
-import { intentionallyFloat } from 'ustaxes/core/util'
+  saveFilingStatusInfo,
+} from "ustaxes/redux/actions";
+import { PersonFields } from "./PersonFields";
+import { FormListContainer } from "ustaxes/components/FormContainer";
+import { usePager } from "ustaxes/components/pager";
+import { Box, Grid } from "@material-ui/core";
+import { Person } from "@material-ui/icons";
+import { Alert } from "@material-ui/lab";
+import { intentionallyFloat } from "ustaxes/core/util";
 
 interface UserPersonForm {
-  firstName: string
-  lastName: string
-  ssid: string
-  isBlind: boolean
-  dateOfBirth?: Date
+  firstName: string;
+  lastName: string;
+  ssid: string;
+  isBlind: boolean;
+  dateOfBirth?: Date;
 }
 
 const blankUserPersonForm: UserPersonForm = {
-  firstName: '',
-  lastName: '',
-  ssid: '',
+  firstName: "",
+  lastName: "",
+  ssid: "",
   isBlind: false,
-  dateOfBirth: undefined
-}
+  dateOfBirth: undefined,
+};
 
 interface UserDependentForm extends UserPersonForm {
-  relationship: string
-  isStudent: boolean
-  numberOfMonths: string
+  relationship: string;
+  isStudent: boolean;
+  numberOfMonths: string;
 }
 
 const blankUserDependentForm: UserDependentForm = {
   ...blankUserPersonForm,
-  relationship: '',
+  relationship: "",
   isStudent: false,
-  numberOfMonths: ''
-}
+  numberOfMonths: "",
+};
 
 const toDependent = (formData: UserDependentForm): Dependent<string> => {
-  const { isStudent, numberOfMonths, ...rest } = formData
+  const { isStudent, numberOfMonths, ...rest } = formData;
   if (formData.dateOfBirth === undefined) {
-    throw new Error('Called with undefined date of birth')
+    throw new Error("Called with undefined date of birth");
   }
 
   return {
@@ -74,65 +74,65 @@ const toDependent = (formData: UserDependentForm): Dependent<string> => {
     role: PersonRole.DEPENDENT,
     qualifyingInfo: {
       numberOfMonths: parseInt(numberOfMonths),
-      isStudent
+      isStudent,
     },
-    dateOfBirth: formData.dateOfBirth.toISOString()
-  }
-}
+    dateOfBirth: formData.dateOfBirth.toISOString(),
+  };
+};
 
 const toDependentForm = (dependent: Dependent): UserDependentForm => {
-  const { qualifyingInfo, dateOfBirth, ...rest } = dependent
+  const { qualifyingInfo, dateOfBirth, ...rest } = dependent;
 
   return {
     ...rest,
-    numberOfMonths: qualifyingInfo?.numberOfMonths.toString() ?? '',
+    numberOfMonths: qualifyingInfo?.numberOfMonths.toString() ?? "",
     isStudent: qualifyingInfo?.isStudent ?? false,
-    dateOfBirth
-  }
-}
+    dateOfBirth,
+  };
+};
 
 interface UserSpouseForm extends UserPersonForm {
-  isTaxpayerDependent: boolean
+  isTaxpayerDependent: boolean;
 }
 
 const blankUserSpouseForm = {
   ...blankUserPersonForm,
-  isTaxpayerDependent: false
-}
+  isTaxpayerDependent: false,
+};
 
 const toSpouse = (formData: UserSpouseForm): Spouse<string> => {
   if (formData.dateOfBirth === undefined) {
-    throw new Error('Called with undefined date of birth')
+    throw new Error("Called with undefined date of birth");
   }
 
   return {
     ...formData,
     role: PersonRole.SPOUSE,
-    dateOfBirth: formData.dateOfBirth.toISOString()
-  }
-}
+    dateOfBirth: formData.dateOfBirth.toISOString(),
+  };
+};
 
 const toSpouseForm = (spouse: Spouse): UserSpouseForm => ({
   ...spouse,
-  dateOfBirth: new Date(spouse.dateOfBirth)
-})
+  dateOfBirth: new Date(spouse.dateOfBirth),
+});
 
 export const AddDependentForm = (): ReactElement => {
   const dependents = useSelector(
     (state: TaxesState) => state.information.taxPayer.dependents
-  )
+  );
 
-  const defaultValues = blankUserDependentForm
+  const defaultValues = blankUserDependentForm;
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   const methods = useForm<UserDependentForm>({
-    defaultValues
-  })
+    defaultValues,
+  });
 
   const onSubmitAdd = (formData: UserDependentForm): void => {
-    dispatch(addDependent(toDependent(formData)))
-  }
+    dispatch(addDependent(toDependent(formData)));
+  };
 
   const onSubmitEdit =
     (index: number) =>
@@ -140,10 +140,10 @@ export const AddDependentForm = (): ReactElement => {
       dispatch(
         editDependent({
           index,
-          value: toDependent(formData)
+          value: toDependent(formData),
         })
-      )
-    }
+      );
+    };
 
   const page = (
     <FormListContainer<UserDependentForm>
@@ -174,28 +174,28 @@ export const AddDependentForm = (): ReactElement => {
         />
       </Grid>
     </FormListContainer>
-  )
+  );
 
-  return <FormProvider {...methods}>{page}</FormProvider>
-}
+  return <FormProvider {...methods}>{page}</FormProvider>;
+};
 
 export const SpouseInfo = (): ReactElement => {
-  const defaultValues = blankUserSpouseForm
+  const defaultValues = blankUserSpouseForm;
   const methods = useForm<UserSpouseForm>({
-    defaultValues
-  })
-  const { getValues } = methods
-  const dispatch = useDispatch()
+    defaultValues,
+  });
+  const { getValues } = methods;
+  const dispatch = useDispatch();
 
   const spouse: Spouse | undefined = useSelector((state: TaxesState) => {
-    return state.information.taxPayer.spouse
-  })
+    return state.information.taxPayer.spouse;
+  });
 
   const onSubmit = (): void => {
-    dispatch(addSpouse(toSpouse(getValues())))
-  }
+    dispatch(addSpouse(toSpouse(getValues())));
+  };
 
-  const onSubmitEdit = (): (() => void) => onSubmit
+  const onSubmitEdit = (): (() => void) => onSubmit;
 
   const page = (
     <FormListContainer
@@ -218,83 +218,83 @@ export const SpouseInfo = (): ReactElement => {
         </PersonFields>
       </Grid>
     </FormListContainer>
-  )
+  );
 
-  return <FormProvider {...methods}>{page}</FormProvider>
-}
+  return <FormProvider {...methods}>{page}</FormProvider>;
+};
 
 export const FilingStatusDropdown = (): ReactElement => {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
-  const onSubmit = (formData: { filingStatus: FilingStatus | '' }): void => {
-    if (formData.filingStatus !== '') {
-      dispatch(saveFilingStatusInfo(formData.filingStatus))
-      onAdvance()
+  const onSubmit = (formData: { filingStatus: FilingStatus | "" }): void => {
+    if (formData.filingStatus !== "") {
+      dispatch(saveFilingStatusInfo(formData.filingStatus));
+      onAdvance();
     }
-  }
+  };
   const taxPayer: TaxPayer | undefined = useSelector((state: TaxesState) => {
-    return state.information.taxPayer
-  })
+    return state.information.taxPayer;
+  });
 
-  const allowedFilingStatuses = filingStatuses(taxPayer)
+  const allowedFilingStatuses = filingStatuses(taxPayer);
 
-  const { onAdvance, navButtons } = usePager()
+  const { onAdvance, navButtons } = usePager();
 
-  const defaultValues: { filingStatus: FilingStatus | '' } = {
+  const defaultValues: { filingStatus: FilingStatus | "" } = {
     filingStatus: (() => {
       if (
         taxPayer.filingStatus !== undefined &&
         allowedFilingStatuses.includes(taxPayer.filingStatus)
       ) {
-        return taxPayer.filingStatus
+        return taxPayer.filingStatus;
       }
-      return ''
-    })()
-  }
+      return "";
+    })(),
+  };
 
   const methods = useForm({
-    defaultValues
-  })
+    defaultValues,
+  });
 
-  const [error, setError] = useState<ReactElement | undefined>(undefined)
+  const [error, setError] = useState<ReactElement | undefined>(undefined);
 
   const {
     handleSubmit,
     getValues,
     reset,
     watch,
-    formState: { isDirty }
-  } = methods
+    formState: { isDirty },
+  } = methods;
 
-  const currentFilingStatus = getValues().filingStatus
+  const currentFilingStatus = getValues().filingStatus;
 
-  const newValue = watch()
+  const newValue = watch();
 
   useEffect(() => {
     // Handle state updates outside this control
     if (!isDirty && currentFilingStatus !== defaultValues.filingStatus) {
-      reset(defaultValues)
+      reset(defaultValues);
     }
     // Handle other state updates that cause current
     // value to be invalid
     else if (
-      currentFilingStatus !== '' &&
+      currentFilingStatus !== "" &&
       !allowedFilingStatuses.includes(currentFilingStatus)
     ) {
-      reset({})
+      reset({});
       setError(
         <Box paddingTop={2}>
           <Alert severity="warning">
-            Filing status was set to {FilingStatusTexts[currentFilingStatus]}{' '}
+            Filing status was set to {FilingStatusTexts[currentFilingStatus]}{" "}
             which is no longer allowed due to your inputs. Make another
             selection.
           </Alert>
         </Box>
-      )
-    } else if (currentFilingStatus !== '' || newValue.filingStatus !== '') {
-      setError(undefined)
+      );
+    } else if (currentFilingStatus !== "" || newValue.filingStatus !== "") {
+      setError(undefined);
     }
-  }, [defaultValues.filingStatus, currentFilingStatus])
+  }, [defaultValues.filingStatus, currentFilingStatus]);
 
   return (
     <FormProvider {...methods}>
@@ -313,13 +313,13 @@ export const FilingStatusDropdown = (): ReactElement => {
         {navButtons}
       </form>
     </FormProvider>
-  )
-}
+  );
+};
 
 const SpouseAndDependent = (): ReactElement => (
   <>
     <Helmet>
-      <title>Family Information | Personal | UsTaxes.org</title>
+      <title>Family Information | Personal | ITIN Help</title>
     </Helmet>
     <h2>Family Information</h2>
     <h3>Spouse Information</h3>
@@ -330,6 +330,6 @@ const SpouseAndDependent = (): ReactElement => (
 
     <FilingStatusDropdown />
   </>
-)
+);
 
-export default SpouseAndDependent
+export default SpouseAndDependent;

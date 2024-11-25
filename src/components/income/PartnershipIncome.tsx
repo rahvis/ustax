@@ -1,26 +1,26 @@
-import { ReactElement, ReactNode } from 'react'
-import { Helmet } from 'react-helmet'
-import { useForm, FormProvider } from 'react-hook-form'
-import { TaxesState, useSelector, useDispatch } from 'ustaxes/redux'
+import { ReactElement, ReactNode } from "react";
+import { Helmet } from "react-helmet";
+import { useForm, FormProvider } from "react-hook-form";
+import { TaxesState, useSelector, useDispatch } from "ustaxes/redux";
 import {
   addScheduleK1Form1065,
   editScheduleK1Form1065,
-  removeScheduleK1Form1065
-} from 'ustaxes/redux/actions'
-import { usePager } from 'ustaxes/components/pager'
+  removeScheduleK1Form1065,
+} from "ustaxes/redux/actions";
+import { usePager } from "ustaxes/components/pager";
 import {
   boxLabel,
   LabeledInput,
   GenericLabeledDropdown,
   formatSSID,
   LabeledCheckbox,
-  formatEIN
-} from 'ustaxes/components/input'
-import { Patterns } from 'ustaxes/components/Patterns'
-import { FormListContainer } from 'ustaxes/components/FormContainer'
-import { Grid, Box } from '@material-ui/core'
-import { Alert } from '@material-ui/lab'
-import { Business } from '@material-ui/icons'
+  formatEIN,
+} from "ustaxes/components/input";
+import { Patterns } from "ustaxes/components/Patterns";
+import { FormListContainer } from "ustaxes/components/FormContainer";
+import { Grid, Box } from "@material-ui/core";
+import { Alert } from "@material-ui/lab";
+import { Business } from "@material-ui/icons";
 import {
   ScheduleK1Form1065,
   FilingStatus,
@@ -28,45 +28,45 @@ import {
   Person,
   PersonRole,
   PrimaryPerson,
-  Spouse
-} from 'ustaxes/core/data'
-import { intentionallyFloat } from 'ustaxes/core/util'
+  Spouse,
+} from "ustaxes/core/data";
+import { intentionallyFloat } from "ustaxes/core/util";
 
 interface ScheduleK1Form1065UserInput {
-  personRole: PersonRole.PRIMARY | PersonRole.SPOUSE
-  partnershipName: string
-  partnershipEin: string
-  partnerOrSCorp: 'P' | 'S'
-  isForeign: boolean
-  isPassive: boolean
-  ordinaryBusinessIncome: string
-  interestIncome: string
-  guaranteedPaymentsForServices: string
-  guaranteedPaymentsForCapital: string
-  selfEmploymentEarningsA: string
-  selfEmploymentEarningsB: string
-  selfEmploymentEarningsC: string
-  distributionsCodeAAmount: string
-  section199AQBI: string
+  personRole: PersonRole.PRIMARY | PersonRole.SPOUSE;
+  partnershipName: string;
+  partnershipEin: string;
+  partnerOrSCorp: "P" | "S";
+  isForeign: boolean;
+  isPassive: boolean;
+  ordinaryBusinessIncome: string;
+  interestIncome: string;
+  guaranteedPaymentsForServices: string;
+  guaranteedPaymentsForCapital: string;
+  selfEmploymentEarningsA: string;
+  selfEmploymentEarningsB: string;
+  selfEmploymentEarningsC: string;
+  distributionsCodeAAmount: string;
+  section199AQBI: string;
 }
 
 const blankUserInput: ScheduleK1Form1065UserInput = {
   personRole: PersonRole.PRIMARY,
-  partnershipName: '',
-  partnershipEin: '',
-  partnerOrSCorp: 'P',
+  partnershipName: "",
+  partnershipEin: "",
+  partnerOrSCorp: "P",
   isForeign: false,
   isPassive: false,
-  ordinaryBusinessIncome: '',
-  interestIncome: '',
-  guaranteedPaymentsForServices: '',
-  guaranteedPaymentsForCapital: '',
-  selfEmploymentEarningsA: '',
-  selfEmploymentEarningsB: '',
-  selfEmploymentEarningsC: '',
-  distributionsCodeAAmount: '',
-  section199AQBI: ''
-}
+  ordinaryBusinessIncome: "",
+  interestIncome: "",
+  guaranteedPaymentsForServices: "",
+  guaranteedPaymentsForCapital: "",
+  selfEmploymentEarningsA: "",
+  selfEmploymentEarningsB: "",
+  selfEmploymentEarningsC: "",
+  distributionsCodeAAmount: "",
+  section199AQBI: "",
+};
 
 const toUserInput = (k1: ScheduleK1Form1065): ScheduleK1Form1065UserInput => ({
   ...blankUserInput,
@@ -84,8 +84,8 @@ const toUserInput = (k1: ScheduleK1Form1065): ScheduleK1Form1065UserInput => ({
   selfEmploymentEarningsB: k1.selfEmploymentEarningsB.toString(),
   selfEmploymentEarningsC: k1.selfEmploymentEarningsC.toString(),
   distributionsCodeAAmount: k1.distributionsCodeAAmount.toString(),
-  section199AQBI: k1.section199AQBI.toString()
-})
+  section199AQBI: k1.section199AQBI.toString(),
+});
 
 const toScheduleK1Form1065 = (
   input: ScheduleK1Form1065UserInput
@@ -105,10 +105,10 @@ const toScheduleK1Form1065 = (
     selfEmploymentEarningsB,
     selfEmploymentEarningsC,
     distributionsCodeAAmount,
-    section199AQBI
-  } = input
-  if (partnershipName === '') {
-    return undefined
+    section199AQBI,
+  } = input;
+  if (partnershipName === "") {
+    return undefined;
   }
   return {
     personRole: personRole,
@@ -125,54 +125,54 @@ const toScheduleK1Form1065 = (
     selfEmploymentEarningsB: Number(selfEmploymentEarningsB),
     selfEmploymentEarningsC: Number(selfEmploymentEarningsC),
     distributionsCodeAAmount: Number(distributionsCodeAAmount),
-    section199AQBI: Number(section199AQBI)
-  }
-}
+    section199AQBI: Number(section199AQBI),
+  };
+};
 
 export const PartnershipIncome = (): ReactElement => {
   const information: Information = useSelector(
     (state: TaxesState) => state.information
-  )
-  const ScheduleK1Form1065s = information.scheduleK1Form1065s
+  );
+  const ScheduleK1Form1065s = information.scheduleK1Form1065s;
   const spouseScheduleK1Form1065s = ScheduleK1Form1065s.filter(
     (k1) => k1.personRole === PersonRole.SPOUSE
-  )
+  );
 
-  const spouse: Spouse | undefined = information.taxPayer.spouse
+  const spouse: Spouse | undefined = information.taxPayer.spouse;
 
-  const primary: PrimaryPerson | undefined = information.taxPayer.primaryPerson
+  const primary: PrimaryPerson | undefined = information.taxPayer.primaryPerson;
 
   const filingStatus: FilingStatus | undefined =
-    information.taxPayer.filingStatus
+    information.taxPayer.filingStatus;
 
   // People for employee selector
   const people: Person[] = [primary, spouse].flatMap((p) =>
     p !== undefined ? [p as Person] : []
-  )
+  );
 
-  const defaultValues = blankUserInput
+  const defaultValues = blankUserInput;
 
-  const methods = useForm<ScheduleK1Form1065UserInput>({ defaultValues })
-  const { handleSubmit } = methods
-  const dispatch = useDispatch()
+  const methods = useForm<ScheduleK1Form1065UserInput>({ defaultValues });
+  const { handleSubmit } = methods;
+  const dispatch = useDispatch();
 
-  const { onAdvance, navButtons } = usePager()
+  const { onAdvance, navButtons } = usePager();
 
   const onSubmitAdd = (formData: ScheduleK1Form1065UserInput): void => {
-    const payload = toScheduleK1Form1065(formData)
+    const payload = toScheduleK1Form1065(formData);
     if (payload !== undefined) {
-      dispatch(addScheduleK1Form1065(payload))
+      dispatch(addScheduleK1Form1065(payload));
     }
-  }
+  };
 
   const onSubmitEdit =
     (index: number) =>
     (formData: ScheduleK1Form1065UserInput): void => {
-      const payload = toScheduleK1Form1065(formData)
+      const payload = toScheduleK1Form1065(formData);
       if (payload !== undefined) {
-        dispatch(editScheduleK1Form1065({ value: payload, index }))
+        dispatch(editScheduleK1Form1065({ value: payload, index }));
       }
-    }
+    };
 
   const form: ReactElement | undefined = (
     <FormListContainer<ScheduleK1Form1065UserInput>
@@ -184,12 +184,12 @@ export const PartnershipIncome = (): ReactElement => {
       icon={() => <Business />}
       primary={(k1) => k1.partnershipName}
       secondary={(k1) => {
-        const scheduleK1Form1065 = toScheduleK1Form1065(k1)
-        if (scheduleK1Form1065 === undefined) return ''
-        return <span>{formatEIN(scheduleK1Form1065.partnershipEin)}</span>
+        const scheduleK1Form1065 = toScheduleK1Form1065(k1);
+        if (scheduleK1Form1065 === undefined) return "";
+        return <span>{formatEIN(scheduleK1Form1065.partnershipEin)}</span>;
       }}
     >
-      {' '}
+      {" "}
       <Grid container spacing={2}>
         <h3>Partnership Income from Schedule K1 (Form 1065)</h3>
         <LabeledInput label="Partnership name" name="partnershipName" />
@@ -199,7 +199,7 @@ export const PartnershipIncome = (): ReactElement => {
           patternConfig={Patterns.ein}
         />
         <GenericLabeledDropdown
-          dropDownData={['Partnership', 'S Corporation']}
+          dropDownData={["Partnership", "S Corporation"]}
           label="Partnership or S Corporation"
           required={true}
           valueMapping={(t) => t.substring(0, 1)}
@@ -216,47 +216,47 @@ export const PartnershipIncome = (): ReactElement => {
           name="isPassive"
         />
         <LabeledInput
-          label={boxLabel('1', 'Ordinary business income (loss)')}
+          label={boxLabel("1", "Ordinary business income (loss)")}
           patternConfig={Patterns.currency}
           name="ordinaryBusinessIncome"
         />
         <LabeledInput
-          label={boxLabel('4a', 'Guaranteed payments for services')}
+          label={boxLabel("4a", "Guaranteed payments for services")}
           patternConfig={Patterns.currency}
           name="guaranteedPaymentsForServices"
         />
         <LabeledInput
-          label={boxLabel('4b', 'Guaranteed payments for capital')}
+          label={boxLabel("4b", "Guaranteed payments for capital")}
           patternConfig={Patterns.currency}
           name="guaranteedPaymentsForCapital"
         />
         <LabeledInput
-          label={boxLabel('5', 'Interest Income')}
+          label={boxLabel("5", "Interest Income")}
           patternConfig={Patterns.currency}
           name="interestIncome"
         />
         <LabeledInput
-          label={boxLabel('14', 'Self-employment earnings (loss) - Code A')}
+          label={boxLabel("14", "Self-employment earnings (loss) - Code A")}
           patternConfig={Patterns.currency}
           name="selfEmploymentEarningsA"
         />
         <LabeledInput
-          label={boxLabel('14', 'Self-employment earnings (loss) - Code B')}
+          label={boxLabel("14", "Self-employment earnings (loss) - Code B")}
           patternConfig={Patterns.currency}
           name="selfEmploymentEarningsB"
         />
         <LabeledInput
-          label={boxLabel('14', 'Self-employment earnings (loss) - Code C')}
+          label={boxLabel("14", "Self-employment earnings (loss) - Code C")}
           patternConfig={Patterns.currency}
           name="selfEmploymentEarningsC"
         />
         <LabeledInput
-          label={boxLabel('19', 'Distributions - Code A')}
+          label={boxLabel("19", "Distributions - Code A")}
           patternConfig={Patterns.currency}
           name="distributionsCodeAAmount"
         />
         <LabeledInput
-          label={boxLabel('20', 'Other information - Code Z')}
+          label={boxLabel("20", "Other information - Code Z")}
           patternConfig={Patterns.currency}
           name="section199AQBI"
         />
@@ -275,7 +275,7 @@ export const PartnershipIncome = (): ReactElement => {
         />
       </Grid>
     </FormListContainer>
-  )
+  );
 
   const spouseScheduleK1Form1065Message: ReactNode = (() => {
     if (
@@ -287,15 +287,15 @@ export const PartnershipIncome = (): ReactElement => {
         <div>
           <Box marginBottom={3}>
             <Alert className="inner" severity="warning">
-              Filing status is set to Married Filing Separately.{' '}
+              Filing status is set to Married Filing Separately.{" "}
               <strong>{spouse.firstName}</strong>
               &apos;s ScheduleK1Form1065s will not be added to the return.
             </Alert>
           </Box>
         </div>
-      )
+      );
     }
-  })()
+  })();
 
   return (
     <FormProvider {...methods}>
@@ -304,7 +304,7 @@ export const PartnershipIncome = (): ReactElement => {
         onSubmit={intentionallyFloat(handleSubmit(onAdvance))}
       >
         <Helmet>
-          <title>Partnership Income | Income | UsTaxes.org</title>
+          <title>Partnership Income | Income | ITIN Help</title>
         </Helmet>
         <h2>Partnership Income</h2>
         <p>
@@ -315,7 +315,7 @@ export const PartnershipIncome = (): ReactElement => {
         {navButtons}
       </form>
     </FormProvider>
-  )
-}
+  );
+};
 
-export default PartnershipIncome
+export default PartnershipIncome;

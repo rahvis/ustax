@@ -1,45 +1,45 @@
-import { ReactElement, ReactNode } from 'react'
-import { Helmet } from 'react-helmet'
-import { FormProvider, useForm } from 'react-hook-form'
-import { useDispatch, useSelector, TaxesState } from 'ustaxes/redux'
-import { setItemizedDeductions } from 'ustaxes/redux/actions'
-import { usePager } from 'ustaxes/components/pager'
-import { LabeledInput, LabeledCheckbox } from 'ustaxes/components/input'
-import { ItemizedDeductions } from 'ustaxes/core/data'
-import { Patterns } from 'ustaxes/components/Patterns'
-import { Grid, Box } from '@material-ui/core'
-import { Alert } from '@material-ui/lab'
-import { intentionallyFloat } from 'ustaxes/core/util'
+import { ReactElement, ReactNode } from "react";
+import { Helmet } from "react-helmet";
+import { FormProvider, useForm } from "react-hook-form";
+import { useDispatch, useSelector, TaxesState } from "ustaxes/redux";
+import { setItemizedDeductions } from "ustaxes/redux/actions";
+import { usePager } from "ustaxes/components/pager";
+import { LabeledInput, LabeledCheckbox } from "ustaxes/components/input";
+import { ItemizedDeductions } from "ustaxes/core/data";
+import { Patterns } from "ustaxes/components/Patterns";
+import { Grid, Box } from "@material-ui/core";
+import { Alert } from "@material-ui/lab";
+import { intentionallyFloat } from "ustaxes/core/util";
 
 interface ItemizedDeductionUserInput {
-  medicalAndDental: string | number
-  stateAndLocalTaxes: string | number
-  isSalesTax: boolean
-  stateAndLocalRealEstateTaxes: string | number
-  stateAndLocalPropertyTaxes: string | number
-  interest8a: string | number
-  interest8b: string | number
-  interest8c: string | number
-  interest8d: string | number
-  investmentInterest: string | number
-  charityCashCheck: string | number
-  charityOther: string | number
+  medicalAndDental: string | number;
+  stateAndLocalTaxes: string | number;
+  isSalesTax: boolean;
+  stateAndLocalRealEstateTaxes: string | number;
+  stateAndLocalPropertyTaxes: string | number;
+  interest8a: string | number;
+  interest8b: string | number;
+  interest8c: string | number;
+  interest8d: string | number;
+  investmentInterest: string | number;
+  charityCashCheck: string | number;
+  charityOther: string | number;
 }
 
 const blankUserInput: ItemizedDeductionUserInput = {
-  medicalAndDental: '',
-  stateAndLocalTaxes: '',
+  medicalAndDental: "",
+  stateAndLocalTaxes: "",
   isSalesTax: false,
-  stateAndLocalRealEstateTaxes: '',
-  stateAndLocalPropertyTaxes: '',
-  interest8a: '',
-  interest8b: '',
-  interest8c: '',
-  interest8d: '',
-  investmentInterest: '',
-  charityCashCheck: '',
-  charityOther: ''
-}
+  stateAndLocalRealEstateTaxes: "",
+  stateAndLocalPropertyTaxes: "",
+  interest8a: "",
+  interest8b: "",
+  interest8c: "",
+  interest8d: "",
+  investmentInterest: "",
+  charityCashCheck: "",
+  charityOther: "",
+};
 
 const toUserInput = (f: ItemizedDeductions): ItemizedDeductionUserInput => ({
   ...blankUserInput,
@@ -54,8 +54,8 @@ const toUserInput = (f: ItemizedDeductions): ItemizedDeductionUserInput => ({
   interest8d: f.interest8d,
   investmentInterest: f.investmentInterest,
   charityCashCheck: f.charityCashCheck,
-  charityOther: f.charityOther
-})
+  charityOther: f.charityOther,
+});
 
 const toItemizedDeductions = (
   f: ItemizedDeductionUserInput
@@ -72,35 +72,37 @@ const toItemizedDeductions = (
     interest8d: Number(f.interest8d),
     investmentInterest: Number(f.investmentInterest),
     charityCashCheck: Number(f.charityCashCheck),
-    charityOther: Number(f.charityOther)
-  }
-}
+    charityOther: Number(f.charityOther),
+  };
+};
 
 export const ItemizedDeductionsInfo = (): ReactElement => {
   const itemizedDeductions: ItemizedDeductions | undefined = useSelector(
     (state: TaxesState) => {
-      return state.information.itemizedDeductions
+      return state.information.itemizedDeductions;
     }
-  )
+  );
 
   const defaultValues: ItemizedDeductionUserInput = {
     ...blankUserInput,
-    ...(itemizedDeductions !== undefined ? toUserInput(itemizedDeductions) : {})
-  }
+    ...(itemizedDeductions !== undefined
+      ? toUserInput(itemizedDeductions)
+      : {}),
+  };
 
-  const { onAdvance, navButtons } = usePager()
+  const { onAdvance, navButtons } = usePager();
 
-  const methods = useForm<ItemizedDeductionUserInput>({ defaultValues })
-  const { handleSubmit, watch } = methods
+  const methods = useForm<ItemizedDeductionUserInput>({ defaultValues });
+  const { handleSubmit, watch } = methods;
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   const onSubmit = (form: ItemizedDeductionUserInput): void => {
-    dispatch(setItemizedDeductions(toItemizedDeductions(form)))
-    onAdvance()
-  }
+    dispatch(setItemizedDeductions(toItemizedDeductions(form)));
+    onAdvance();
+  };
 
-  const charityCashCheck: string | number = watch('charityCashCheck')
+  const charityCashCheck: string | number = watch("charityCashCheck");
 
   const charityWarning: ReactNode = (() => {
     if (Number(charityCashCheck || 0) > 0) {
@@ -123,13 +125,13 @@ export const ItemizedDeductionsInfo = (): ReactElement => {
             </Alert>
           </Box>
         </div>
-      )
+      );
     }
-  })()
+  })();
 
   // Limit charity to $500
-  const currencyMax500Pattern = Object.assign({}, Patterns.currency)
-  currencyMax500Pattern.max = 500
+  const currencyMax500Pattern = Object.assign({}, Patterns.currency);
+  currencyMax500Pattern.max = 500;
 
   const form: ReactElement | undefined = (
     <div>
@@ -217,7 +219,7 @@ export const ItemizedDeductionsInfo = (): ReactElement => {
         />
       </Grid>
     </div>
-  )
+  );
 
   return (
     <form tabIndex={-1} onSubmit={intentionallyFloat(handleSubmit(onSubmit))}>
@@ -228,16 +230,14 @@ export const ItemizedDeductionsInfo = (): ReactElement => {
       </p>
       <FormProvider {...methods}>
         <Helmet>
-          <title>
-            Itemized Deduction Information | Deductions | UsTaxes.org
-          </title>
+          <title>Itemized Deduction Information | Deductions | ITIN Help</title>
         </Helmet>
         <h2>Itemized Deduction Information</h2>
         {form}
         {navButtons}
       </FormProvider>
     </form>
-  )
-}
+  );
+};
 
-export default ItemizedDeductionsInfo
+export default ItemizedDeductionsInfo;

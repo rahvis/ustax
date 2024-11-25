@@ -1,55 +1,55 @@
-import { ReactElement, useState } from 'react'
-import { Helmet } from 'react-helmet'
-import { useForm, FormProvider } from 'react-hook-form'
-import { useDispatch, YearsTaxesState } from 'ustaxes/redux'
-import { useSelector } from 'react-redux'
-import { addAsset } from 'ustaxes/redux/actions'
-import { usePager } from 'ustaxes/components/pager'
-import { Asset, AssetType, State, TaxYears } from 'ustaxes/core/data'
+import { ReactElement, useState } from "react";
+import { Helmet } from "react-helmet";
+import { useForm, FormProvider } from "react-hook-form";
+import { useDispatch, YearsTaxesState } from "ustaxes/redux";
+import { useSelector } from "react-redux";
+import { addAsset } from "ustaxes/redux/actions";
+import { usePager } from "ustaxes/components/pager";
+import { Asset, AssetType, State, TaxYears } from "ustaxes/core/data";
 import {
   GenericLabeledDropdown,
   USStateDropDown,
-  LabeledInput
-} from 'ustaxes/components/input'
-import { Patterns } from 'ustaxes/components/Patterns'
-import { OpenableFormContainer } from 'ustaxes/components/FormContainer'
-import { Grid } from '@material-ui/core'
-import { Alert } from '@material-ui/lab'
-import { TransactionImporter } from './assets/TransactionImporter'
-import FilteredAssetsTable from './assets/FilteredAssetsTable'
-import { DatePicker } from '../input/DatePicker'
-import { intentionallyFloat } from 'ustaxes/core/util'
+  LabeledInput,
+} from "ustaxes/components/input";
+import { Patterns } from "ustaxes/components/Patterns";
+import { OpenableFormContainer } from "ustaxes/components/FormContainer";
+import { Grid } from "@material-ui/core";
+import { Alert } from "@material-ui/lab";
+import { TransactionImporter } from "./assets/TransactionImporter";
+import FilteredAssetsTable from "./assets/FilteredAssetsTable";
+import { DatePicker } from "../input/DatePicker";
+import { intentionallyFloat } from "ustaxes/core/util";
 
 const showAssetType = (p: AssetType) => {
   switch (p) {
-    case 'Security':
-      return 'Security (Stock, bond, option, mutual fund, etc.)'
-    case 'Real Estate':
-      return 'Real Estate'
+    case "Security":
+      return "Security (Stock, bond, option, mutual fund, etc.)";
+    case "Real Estate":
+      return "Real Estate";
   }
-}
+};
 
 interface AssetUserInput {
-  name: string
-  positionType: AssetType
-  openDate?: Date
-  closeDate?: Date
-  openPrice: string
-  closePrice?: string
-  openFee: string
-  closeFee: string
-  quantity: string
-  state?: State
+  name: string;
+  positionType: AssetType;
+  openDate?: Date;
+  closeDate?: Date;
+  openPrice: string;
+  closePrice?: string;
+  openFee: string;
+  closeFee: string;
+  quantity: string;
+  state?: State;
 }
 
 const blankAssetUserInput: AssetUserInput = {
-  name: '',
-  positionType: 'Security',
-  openPrice: '',
-  openFee: '',
-  closeFee: '',
-  quantity: ''
-}
+  name: "",
+  positionType: "Security",
+  openPrice: "",
+  openFee: "",
+  closeFee: "",
+  quantity: "",
+};
 
 const toAsset = (input: AssetUserInput): Asset<Date> | undefined => {
   const {
@@ -62,10 +62,10 @@ const toAsset = (input: AssetUserInput): Asset<Date> | undefined => {
     state,
     openFee,
     closeFee,
-    positionType
-  } = input
-  if (name === '' || openDate === undefined) {
-    return undefined
+    positionType,
+  } = input;
+  if (name === "" || openDate === undefined) {
+    return undefined;
   }
   return {
     positionType,
@@ -76,30 +76,30 @@ const toAsset = (input: AssetUserInput): Asset<Date> | undefined => {
     closeFee: Number(closeFee),
     openPrice: Number(openPrice),
     closePrice: Number(closePrice),
-    quantity: input.positionType === 'Real Estate' ? 1 : Number(quantity),
-    state
-  }
-}
+    quantity: input.positionType === "Real Estate" ? 1 : Number(quantity),
+    state,
+  };
+};
 
 export const OtherInvestments = (): ReactElement => {
-  const year = useSelector((state: YearsTaxesState) => state.activeYear)
-  const [isOpen, setOpen] = useState(false)
-  const defaultValues = blankAssetUserInput
-  const methods = useForm<AssetUserInput>({ defaultValues })
-  const { handleSubmit, watch } = methods
-  const positionType = watch('positionType')
-  const openDate = watch('openDate')
-  const closeDate = watch('closeDate')
-  const dispatch = useDispatch()
+  const year = useSelector((state: YearsTaxesState) => state.activeYear);
+  const [isOpen, setOpen] = useState(false);
+  const defaultValues = blankAssetUserInput;
+  const methods = useForm<AssetUserInput>({ defaultValues });
+  const { handleSubmit, watch } = methods;
+  const positionType = watch("positionType");
+  const openDate = watch("openDate");
+  const closeDate = watch("closeDate");
+  const dispatch = useDispatch();
 
-  const { onAdvance, navButtons } = usePager()
+  const { onAdvance, navButtons } = usePager();
 
   const onSubmitAdd = (formData: AssetUserInput): void => {
-    const payload = toAsset(formData)
+    const payload = toAsset(formData);
     if (payload !== undefined) {
-      dispatch(addAsset(payload))
+      dispatch(addAsset(payload));
     }
-  }
+  };
 
   const form: ReactElement | undefined = (
     <OpenableFormContainer
@@ -113,13 +113,13 @@ export const OtherInvestments = (): ReactElement => {
         <GenericLabeledDropdown<AssetType, AssetUserInput>
           label="Asset Type"
           name="positionType"
-          dropDownData={['Security', 'Real Estate']}
+          dropDownData={["Security", "Real Estate"]}
           keyMapping={(x) => x}
           textMapping={showAssetType}
           valueMapping={(x) => x}
         />
         <LabeledInput
-          label={positionType === 'Real Estate' ? 'Address' : 'Name'}
+          label={positionType === "Real Estate" ? "Address" : "Name"}
           name="name"
         />
         <DatePicker
@@ -134,7 +134,7 @@ export const OtherInvestments = (): ReactElement => {
           name="closeDate"
         />
         {(() => {
-          if (positionType === 'Real Estate') {
+          if (positionType === "Real Estate") {
             return (
               <>
                 <LabeledInput
@@ -149,7 +149,7 @@ export const OtherInvestments = (): ReactElement => {
                 />
                 <USStateDropDown label="Property state" name="state" />
               </>
-            )
+            );
           } else {
             return (
               <>
@@ -179,7 +179,7 @@ export const OtherInvestments = (): ReactElement => {
                   name="closeFee"
                 />
               </>
-            )
+            );
           }
         })()}
         {(() => {
@@ -192,17 +192,17 @@ export const OtherInvestments = (): ReactElement => {
                 This asset will not be included in the current year&apos;s
                 return because you have not selected a date in the current year.
               </Alert>
-            )
+            );
           }
         })()}
       </Grid>
     </OpenableFormContainer>
-  )
+  );
 
   return (
     <>
       <Helmet>
-        <title>Other Investments | Income | UsTaxes.org</title>
+        <title>Other Investments | Income | ITIN Help</title>
       </Helmet>
       <h2>Other Investments</h2>
       <FilteredAssetsTable />
@@ -217,7 +217,7 @@ export const OtherInvestments = (): ReactElement => {
       </FormProvider>
       <TransactionImporter />
     </>
-  )
-}
+  );
+};
 
-export default OtherInvestments
+export default OtherInvestments;

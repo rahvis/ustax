@@ -1,65 +1,65 @@
-import { ReactElement } from 'react'
-import { Helmet } from 'react-helmet'
-import { FormProvider, useForm } from 'react-hook-form'
-import SchoolIcon from '@material-ui/icons/School'
-import { useDispatch, useSelector, TaxesState } from 'ustaxes/redux'
-import { add1098e, edit1098e, remove1098e } from 'ustaxes/redux/actions'
-import { usePager } from 'ustaxes/components/pager'
-import { Currency, LabeledInput } from 'ustaxes/components/input'
-import { F1098e } from 'ustaxes/core/data'
-import { Patterns } from 'ustaxes/components/Patterns'
-import { FormListContainer } from 'ustaxes/components/FormContainer'
-import { Grid } from '@material-ui/core'
-import { intentionallyFloat } from 'ustaxes/core/util'
+import { ReactElement } from "react";
+import { Helmet } from "react-helmet";
+import { FormProvider, useForm } from "react-hook-form";
+import SchoolIcon from "@material-ui/icons/School";
+import { useDispatch, useSelector, TaxesState } from "ustaxes/redux";
+import { add1098e, edit1098e, remove1098e } from "ustaxes/redux/actions";
+import { usePager } from "ustaxes/components/pager";
+import { Currency, LabeledInput } from "ustaxes/components/input";
+import { F1098e } from "ustaxes/core/data";
+import { Patterns } from "ustaxes/components/Patterns";
+import { FormListContainer } from "ustaxes/components/FormContainer";
+import { Grid } from "@material-ui/core";
+import { intentionallyFloat } from "ustaxes/core/util";
 
 const showInterest = (a: F1098e): ReactElement => {
-  return <Currency value={a.interest} />
-}
+  return <Currency value={a.interest} />;
+};
 
 interface F1098EUserInput {
-  lender: string
-  interest: string | number
+  lender: string;
+  interest: string | number;
 }
 
 const blankUserInput: F1098EUserInput = {
-  lender: '',
-  interest: ''
-}
+  lender: "",
+  interest: "",
+};
 
 const toUserInput = (f: F1098e): F1098EUserInput => ({
   ...blankUserInput,
   lender: f.lender,
-  interest: f.interest
-})
+  interest: f.interest,
+});
 
 const toF1098e = (f: F1098EUserInput): F1098e => {
   return {
     lender: f.lender,
-    interest: Number(f.interest)
-  }
-}
+    interest: Number(f.interest),
+  };
+};
 
 export default function F1098eInfo(): ReactElement {
-  const f1098es = useSelector((state: TaxesState) => state.information.f1098es)
+  const f1098es = useSelector((state: TaxesState) => state.information.f1098es);
 
-  const defaultValues: F1098EUserInput = blankUserInput
+  const defaultValues: F1098EUserInput = blankUserInput;
 
-  const { onAdvance, navButtons } = usePager()
+  const { onAdvance, navButtons } = usePager();
 
-  const methods = useForm<F1098EUserInput>({ defaultValues })
-  const { handleSubmit } = methods
+  const methods = useForm<F1098EUserInput>({ defaultValues });
+  const { handleSubmit } = methods;
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   const onAdd1098e = (formData: F1098EUserInput): void => {
-    dispatch(add1098e(toF1098e(formData)))
-  }
+    dispatch(add1098e(toF1098e(formData)));
+  };
 
   const onEdit1098e =
     (index: number) =>
     (formData: F1098EUserInput): void => {
-      dispatch(edit1098e({ value: toF1098e(formData), index }))
-    }
+      dispatch(edit1098e({ value: toF1098e(formData), index }));
+    };
 
   const form: ReactElement | undefined = (
     <FormListContainer
@@ -87,7 +87,7 @@ export default function F1098eInfo(): ReactElement {
         />
       </Grid>
     </FormListContainer>
-  )
+  );
 
   return (
     <FormProvider {...methods}>
@@ -96,12 +96,12 @@ export default function F1098eInfo(): ReactElement {
         onSubmit={intentionallyFloat(handleSubmit(onAdvance))}
       >
         <Helmet>
-          <title>1098-E Information | Deductions | UsTaxes.org</title>
+          <title>1098-E Information | Deductions | ITIN Help</title>
         </Helmet>
         <h2>1098-E Information</h2>
         {form}
         {navButtons}
       </form>
     </FormProvider>
-  )
+  );
 }

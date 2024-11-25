@@ -37,10 +37,27 @@
   outline: none;
 }
 
-.form-submit {
-  width: 100%;
-  padding: 12px;
-  background-color: #00796b;
+.SAVE {
+  width: 200px;
+  padding: 10px;
+  background-color: #00e676;
+  color: black;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-inline: 10px;
+}
+
+.SAVE:hover {
+  background-color: #00e676;
+}
+
+.PREVIOUS {
+  width: 150px;
+  padding: 10px;
+  background-color: black;
   color: white;
   border: none;
   border-radius: 4px;
@@ -49,18 +66,6 @@
   transition: background-color 0.3s ease;
 }
 
-.form-submit:hover {
-  background-color: #004d40;
-}
-
-.checkbox-group {
-  display: flex;
-  gap: 10px;
-  margin-top: 5px;
-}
-
-.checkbox-label {
-  display: flex;
-  align-items: center;
-  gap: 5px;
+.PREVIOUS:hover {
+  background-color: black;
 }

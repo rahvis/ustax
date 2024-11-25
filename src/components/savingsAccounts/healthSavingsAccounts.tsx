@@ -1,16 +1,16 @@
-import { ReactElement } from 'react'
-import { Helmet } from 'react-helmet'
-import { useSelector } from 'react-redux'
-import { useYearSelector, useYearDispatch } from 'ustaxes/redux/yearDispatch'
-import { FormProvider, useForm } from 'react-hook-form'
-import { usePager } from 'ustaxes/components/pager'
+import { ReactElement } from "react";
+import { Helmet } from "react-helmet";
+import { useSelector } from "react-redux";
+import { useYearSelector, useYearDispatch } from "ustaxes/redux/yearDispatch";
+import { FormProvider, useForm } from "react-hook-form";
+import { usePager } from "ustaxes/components/pager";
 import {
   HealthSavingsAccount,
   Person,
   PersonRole,
   TaxYear,
-  TaxYears
-} from 'ustaxes/core/data'
+  TaxYears,
+} from "ustaxes/core/data";
 
 import {
   Currency,
@@ -18,40 +18,40 @@ import {
   GenericLabeledDropdown,
   LabeledDropdown,
   formatSSID,
-  DatePicker
-} from 'ustaxes/components/input'
-import { Patterns } from 'ustaxes/components/Patterns'
-import { FormListContainer } from 'ustaxes/components/FormContainer'
-import { Grid } from '@material-ui/core'
-import { Work } from '@material-ui/icons'
-import { TaxesState } from 'ustaxes/redux'
-import { addHSA, editHSA, removeHSA } from 'ustaxes/redux/actions'
-import { YearsTaxesState } from 'ustaxes/redux'
+  DatePicker,
+} from "ustaxes/components/input";
+import { Patterns } from "ustaxes/components/Patterns";
+import { FormListContainer } from "ustaxes/components/FormContainer";
+import { Grid } from "@material-ui/core";
+import { Work } from "@material-ui/icons";
+import { TaxesState } from "ustaxes/redux";
+import { addHSA, editHSA, removeHSA } from "ustaxes/redux/actions";
+import { YearsTaxesState } from "ustaxes/redux";
 
-import { format } from 'date-fns'
-import { intentionallyFloat } from 'ustaxes/core/util'
+import { format } from "date-fns";
+import { intentionallyFloat } from "ustaxes/core/util";
 
 interface HSAUserInput {
-  label: string
-  coverageType: 'self-only' | 'family'
-  contributions: string
-  personRole: PersonRole.PRIMARY | PersonRole.SPOUSE
-  startDate: Date
-  endDate: Date
-  totalDistributions: string
-  qualifiedDistributions: string
+  label: string;
+  coverageType: "self-only" | "family";
+  contributions: string;
+  personRole: PersonRole.PRIMARY | PersonRole.SPOUSE;
+  startDate: Date;
+  endDate: Date;
+  totalDistributions: string;
+  qualifiedDistributions: string;
 }
 
 const blankUserInput: HSAUserInput = {
-  label: '',
-  coverageType: 'self-only',
-  contributions: '',
+  label: "",
+  coverageType: "self-only",
+  contributions: "",
   personRole: PersonRole.PRIMARY,
   startDate: new Date(),
   endDate: new Date(),
-  totalDistributions: '',
-  qualifiedDistributions: ''
-}
+  totalDistributions: "",
+  qualifiedDistributions: "",
+};
 
 const toHSA = (formData: HSAUserInput): HealthSavingsAccount<string> => ({
   ...formData,
@@ -65,8 +65,8 @@ const toHSA = (formData: HSAUserInput): HealthSavingsAccount<string> => ({
   startDate: formData.startDate.toISOString(),
   endDate: formData.endDate.toISOString(),
   totalDistributions: parseInt(formData.totalDistributions),
-  qualifiedDistributions: parseInt(formData.qualifiedDistributions)
-})
+  qualifiedDistributions: parseInt(formData.qualifiedDistributions),
+});
 
 const toHSAUserInput = (data: HealthSavingsAccount): HSAUserInput => ({
   ...blankUserInput,
@@ -76,42 +76,42 @@ const toHSAUserInput = (data: HealthSavingsAccount): HSAUserInput => ({
   startDate: new Date(data.startDate),
   endDate: new Date(data.endDate),
   totalDistributions: data.totalDistributions.toString(),
-  qualifiedDistributions: data.qualifiedDistributions.toString()
-})
+  qualifiedDistributions: data.qualifiedDistributions.toString(),
+});
 
 export default function HealthSavingsAccounts(): ReactElement {
-  const defaultValues = blankUserInput
+  const defaultValues = blankUserInput;
   const hsa = useYearSelector(
     (state: TaxesState) => state.information.healthSavingsAccounts
-  )
+  );
 
   const people: Person[] = useYearSelector((state: TaxesState) => [
     state.information.taxPayer.primaryPerson,
-    state.information.taxPayer.spouse
+    state.information.taxPayer.spouse,
   ])
     .filter((p) => p !== undefined)
-    .map((p) => p as Person)
+    .map((p) => p as Person);
 
-  const dispatch = useYearDispatch()
+  const dispatch = useYearDispatch();
 
-  const methods = useForm<HSAUserInput>({ defaultValues })
-  const { handleSubmit } = methods
+  const methods = useForm<HSAUserInput>({ defaultValues });
+  const { handleSubmit } = methods;
 
   const activeYear: TaxYear = useSelector(
     (state: YearsTaxesState) => state.activeYear
-  )
+  );
 
-  const { navButtons, onAdvance } = usePager()
+  const { navButtons, onAdvance } = usePager();
 
   const onSubmitAdd = (formData: HSAUserInput): void => {
-    dispatch(addHSA(toHSA(formData)))
-  }
+    dispatch(addHSA(toHSA(formData)));
+  };
 
   const onSubmitEdit =
     (index: number) =>
     (formData: HSAUserInput): void => {
-      dispatch(editHSA({ index, value: toHSA(formData) }))
-    }
+      dispatch(editHSA({ index, value: toHSA(formData) }));
+    };
 
   const hsaBlock = (
     <FormListContainer<HSAUserInput>
@@ -126,16 +126,16 @@ export default function HealthSavingsAccounts(): ReactElement {
         <span>
           contributions: <Currency value={toHSA(hsa).contributions} />
           <br />
-          total distributions:{' '}
+          total distributions:{" "}
           <Currency value={toHSA(hsa).totalDistributions} />
           <br />
-          qualified distributions:{' '}
+          qualified distributions:{" "}
           <Currency value={toHSA(hsa).qualifiedDistributions} />
           <br />
           coverage type: {hsa.coverageType}
           <br />
-          coverage span: {format(hsa.startDate, 'MMMM do, yyyy')} to{' '}
-          {format(hsa.endDate, 'MMMM do, yyyy')}
+          coverage span: {format(hsa.startDate, "MMMM do, yyyy")} to{" "}
+          {format(hsa.endDate, "MMMM do, yyyy")}
         </span>
       )}
     >
@@ -165,7 +165,7 @@ export default function HealthSavingsAccounts(): ReactElement {
           sizes={{ xs: 12, lg: 6 }}
         />
         <LabeledDropdown<HSAUserInput>
-          dropDownData={['self-only', 'family']}
+          dropDownData={["self-only", "family"]}
           label="Coverage Type"
           name="coverageType"
         />
@@ -197,9 +197,9 @@ export default function HealthSavingsAccounts(): ReactElement {
         />
       </Grid>
     </FormListContainer>
-  )
+  );
 
-  const form: ReactElement = <>{hsaBlock}</>
+  const form: ReactElement = <>{hsaBlock}</>;
 
   return (
     <FormProvider {...methods}>
@@ -209,7 +209,7 @@ export default function HealthSavingsAccounts(): ReactElement {
       >
         <Helmet>
           <title>
-            Health Savings Accounts (HSA) | Savings Accounts | UsTaxes.org
+            Health Savings Accounts (HSA) | Savings Accounts | ITIN Help
           </title>
         </Helmet>
         <h2>Health Savings Accounts (HSA)</h2>
@@ -217,5 +217,5 @@ export default function HealthSavingsAccounts(): ReactElement {
         {navButtons}
       </form>
     </FormProvider>
-  )
+  );
 }

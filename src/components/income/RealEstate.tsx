@@ -1,16 +1,16 @@
-import { ReactElement } from 'react'
-import { Message, useForm, useWatch, FormProvider } from 'react-hook-form'
-import { useDispatch } from 'ustaxes/redux'
-import { useYearSelector } from 'ustaxes/redux/yearDispatch'
-import { useSelector } from 'react-redux'
-import { Helmet } from 'react-helmet'
+import { ReactElement } from "react";
+import { Message, useForm, useWatch, FormProvider } from "react-hook-form";
+import { useDispatch } from "ustaxes/redux";
+import { useYearSelector } from "ustaxes/redux/yearDispatch";
+import { useSelector } from "react-redux";
+import { Helmet } from "react-helmet";
 
 import {
   addProperty,
   editProperty,
-  removeProperty
-} from 'ustaxes/redux/actions'
-import { usePager } from 'ustaxes/components/pager'
+  removeProperty,
+} from "ustaxes/redux/actions";
+import { usePager } from "ustaxes/components/pager";
 import {
   Property,
   Address,
@@ -19,73 +19,73 @@ import {
   PropertyType,
   PropertyTypeName,
   TaxYear,
-  TaxYears
-} from 'ustaxes/core/data'
-import { YearsTaxesState } from 'ustaxes/redux'
-import AddressFields from 'ustaxes/components/TaxPayer/Address'
+  TaxYears,
+} from "ustaxes/core/data";
+import { YearsTaxesState } from "ustaxes/redux";
+import AddressFields from "ustaxes/components/TaxPayer/Address";
 import {
   Currency,
   GenericLabeledDropdown,
   LabeledCheckbox,
-  LabeledInput
-} from 'ustaxes/components/input'
-import { Patterns } from 'ustaxes/components/Patterns'
-import { daysInYear, enumKeys, intentionallyFloat } from 'ustaxes/core/util'
-import { HouseOutlined } from '@material-ui/icons'
-import { FormListContainer } from 'ustaxes/components/FormContainer'
-import { Grid } from '@material-ui/core'
-import _ from 'lodash'
+  LabeledInput,
+} from "ustaxes/components/input";
+import { Patterns } from "ustaxes/components/Patterns";
+import { daysInYear, enumKeys, intentionallyFloat } from "ustaxes/core/util";
+import { HouseOutlined } from "@material-ui/icons";
+import { FormListContainer } from "ustaxes/components/FormContainer";
+import { Grid } from "@material-ui/core";
+import _ from "lodash";
 
 interface PropertyAddForm {
-  address?: Address
-  rentReceived?: number
-  rentalDays?: number
-  personalUseDays?: number
-  qualifiedJointVenture: boolean
-  propertyType?: PropertyTypeName
-  otherPropertyType?: string
-  expenses: Partial<{ [K in PropertyExpenseTypeName]: number }>
-  otherExpenseType?: string
+  address?: Address;
+  rentReceived?: number;
+  rentalDays?: number;
+  personalUseDays?: number;
+  qualifiedJointVenture: boolean;
+  propertyType?: PropertyTypeName;
+  otherPropertyType?: string;
+  expenses: Partial<{ [K in PropertyExpenseTypeName]: number }>;
+  otherExpenseType?: string;
 }
 
 const blankAddForm: PropertyAddForm = {
   qualifiedJointVenture: false,
-  expenses: {}
-}
+  expenses: {},
+};
 
 const displayExpense = (k: PropertyExpenseType): string => {
   const lookup = {
-    [PropertyExpenseType.advertising]: 'Advertising',
-    [PropertyExpenseType.auto]: 'Auto and travel',
-    [PropertyExpenseType.cleaning]: 'Cleaning and maintenance',
-    [PropertyExpenseType.commissions]: 'Commissions',
-    [PropertyExpenseType.insurance]: 'Insurance',
-    [PropertyExpenseType.legal]: 'Legal and other professional fees',
-    [PropertyExpenseType.management]: 'Management fees',
-    [PropertyExpenseType.mortgage]: 'Mortgage interest paid to banks, etc',
-    [PropertyExpenseType.otherInterest]: 'Other interest',
-    [PropertyExpenseType.repairs]: 'Repairs',
-    [PropertyExpenseType.supplies]: 'Supplies',
-    [PropertyExpenseType.taxes]: 'Taxes',
-    [PropertyExpenseType.utilities]: 'Utilities',
-    [PropertyExpenseType.depreciation]: 'Depreciation expense or depletion',
-    [PropertyExpenseType.other]: 'Other'
-  }
-  return lookup[k]
-}
+    [PropertyExpenseType.advertising]: "Advertising",
+    [PropertyExpenseType.auto]: "Auto and travel",
+    [PropertyExpenseType.cleaning]: "Cleaning and maintenance",
+    [PropertyExpenseType.commissions]: "Commissions",
+    [PropertyExpenseType.insurance]: "Insurance",
+    [PropertyExpenseType.legal]: "Legal and other professional fees",
+    [PropertyExpenseType.management]: "Management fees",
+    [PropertyExpenseType.mortgage]: "Mortgage interest paid to banks, etc",
+    [PropertyExpenseType.otherInterest]: "Other interest",
+    [PropertyExpenseType.repairs]: "Repairs",
+    [PropertyExpenseType.supplies]: "Supplies",
+    [PropertyExpenseType.taxes]: "Taxes",
+    [PropertyExpenseType.utilities]: "Utilities",
+    [PropertyExpenseType.depreciation]: "Depreciation expense or depletion",
+    [PropertyExpenseType.other]: "Other",
+  };
+  return lookup[k];
+};
 
 const displayPropertyType = (k: PropertyType): string => {
   const lookup = {
-    [PropertyType.singleFamily]: 'Single family',
-    [PropertyType.multiFamily]: 'Multifamily',
-    [PropertyType.vacation]: 'Vacation',
-    [PropertyType.commercial]: 'Commercial',
-    [PropertyType.land]: 'Land',
-    [PropertyType.selfRental]: 'Self rental',
-    [PropertyType.other]: 'Other'
-  }
-  return lookup[k]
-}
+    [PropertyType.singleFamily]: "Single family",
+    [PropertyType.multiFamily]: "Multifamily",
+    [PropertyType.vacation]: "Vacation",
+    [PropertyType.commercial]: "Commercial",
+    [PropertyType.land]: "Land",
+    [PropertyType.selfRental]: "Self rental",
+    [PropertyType.other]: "Other",
+  };
+  return lookup[k];
+};
 
 const toProperty = (formData: PropertyAddForm): Property => {
   const {
@@ -97,11 +97,11 @@ const toProperty = (formData: PropertyAddForm): Property => {
     otherPropertyType,
     personalUseDays,
     expenses,
-    otherExpenseType
-  } = formData
+    otherExpenseType,
+  } = formData;
 
   if (address === undefined || propertyType === undefined) {
-    throw new Error('Validation failed')
+    throw new Error("Validation failed");
   }
 
   const newExpenses: Partial<{ [K in PropertyExpenseTypeName]: number }> =
@@ -109,7 +109,7 @@ const toProperty = (formData: PropertyAddForm): Property => {
       enumKeys(PropertyExpenseType)
         .filter((e) => e in expenses && (expenses[e] as number) > 0)
         .map((e) => [e, Number(expenses[e])])
-    )
+    );
 
   return {
     address,
@@ -120,9 +120,9 @@ const toProperty = (formData: PropertyAddForm): Property => {
     propertyType,
     otherPropertyType,
     expenses: newExpenses,
-    otherExpenseType
-  }
-}
+    otherExpenseType,
+  };
+};
 
 const toUserInput = (property: Property): PropertyAddForm => {
   return {
@@ -135,61 +135,63 @@ const toUserInput = (property: Property): PropertyAddForm => {
     propertyType: property.propertyType,
     otherPropertyType: property.otherPropertyType,
     expenses: property.expenses,
-    otherExpenseType: property.otherExpenseType
-  }
-}
+    otherExpenseType: property.otherExpenseType,
+  };
+};
 
 export default function RealEstate(): ReactElement {
-  const defaultValues = blankAddForm
-  const methods = useForm<PropertyAddForm>({ defaultValues })
-  const { handleSubmit, control, getValues } = methods
+  const defaultValues = blankAddForm;
+  const methods = useForm<PropertyAddForm>({ defaultValues });
+  const { handleSubmit, control, getValues } = methods;
 
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
-  const { onAdvance, navButtons } = usePager()
+  const { onAdvance, navButtons } = usePager();
 
   const activeYear: TaxYear = useSelector(
     (state: YearsTaxesState) => state.activeYear
-  )
+  );
 
   const properties: Property[] = useYearSelector(
     (state) => state.information.realEstate
-  )
+  );
 
   const propertyType = useWatch({
     control,
-    name: 'propertyType'
-  })
+    name: "propertyType",
+  });
 
   const otherExpensesEntered: number | undefined = useWatch({
     control,
-    name: 'expenses.other'
-  })
+    name: "expenses.other",
+  });
 
   const validateDays = (n: number, other: number): Message | true => {
-    const days = daysInYear(TaxYears[activeYear])
-    return n + other <= days ? true : `Total use days must be less than ${days}`
-  }
+    const days = daysInYear(TaxYears[activeYear]);
+    return n + other <= days
+      ? true
+      : `Total use days must be less than ${days}`;
+  };
 
   const validatePersonal = (n: number): Message | true =>
-    validateDays(n, Number(getValues().rentalDays ?? 0))
+    validateDays(n, Number(getValues().rentalDays ?? 0));
 
   const validateRental = (n: number): Message | true =>
-    validateDays(n, Number(getValues().personalUseDays ?? 0))
+    validateDays(n, Number(getValues().personalUseDays ?? 0));
 
   const deleteProperty = (n: number): void => {
-    dispatch(removeProperty(n))
-  }
+    dispatch(removeProperty(n));
+  };
 
   const onAddProperty = (formData: PropertyAddForm): void => {
-    dispatch(addProperty(toProperty(formData)))
-  }
+    dispatch(addProperty(toProperty(formData)));
+  };
 
   const onEditProperty =
     (index: number) =>
     (formData: PropertyAddForm): void => {
-      dispatch(editProperty({ value: toProperty(formData), index }))
-    }
+      dispatch(editProperty({ value: toProperty(formData), index }));
+    };
 
   const expenseFields: ReactElement[] = enumKeys(PropertyExpenseType).map(
     (k, i) => (
@@ -201,7 +203,7 @@ export default function RealEstate(): ReactElement {
         required={false}
       />
     )
-  )
+  );
 
   const otherExpenseDescription = (() => {
     if ((otherExpensesEntered ?? 0) !== 0) {
@@ -212,9 +214,9 @@ export default function RealEstate(): ReactElement {
           name="otherExpenseType"
           required={true}
         />
-      )
+      );
     }
-  })()
+  })();
 
   const form = (
     <FormListContainer
@@ -243,14 +245,14 @@ export default function RealEstate(): ReactElement {
           valueMapping={(n) => n}
         />
         {(() => {
-          if (propertyType === 'other') {
+          if (propertyType === "other") {
             return (
               <LabeledInput
                 name="otherPropertyType"
                 label="Short property type description"
                 required={true}
               />
-            )
+            );
           }
         })()}
       </Grid>
@@ -296,7 +298,7 @@ export default function RealEstate(): ReactElement {
           .value()}
       </Grid>
     </FormListContainer>
-  )
+  );
 
   return (
     <FormProvider {...methods}>
@@ -305,12 +307,12 @@ export default function RealEstate(): ReactElement {
         onSubmit={intentionallyFloat(handleSubmit(onAdvance))}
       >
         <Helmet>
-          <title>Real Estate | Income | UsTaxes.org</title>
+          <title>Real Estate | Income | ITIN Help</title>
         </Helmet>
         <h2>Properties</h2>
         {form}
         {navButtons}
       </form>
     </FormProvider>
-  )
+  );
 }
