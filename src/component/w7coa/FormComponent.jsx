@@ -1,14 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-misused-promises */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import "./FormComponent.css";
 import { useFormContext } from "../FormContext";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const FormComponent = () => {
   const { register, handleSubmit } = useForm();
-  const { updateFormData } = useFormContext(); // Use context API
+  const { formData, updateFormData } = useFormContext(); // Use context API
+  const [data, setData] = useState({});
+
+  const navigate = useNavigate();
 
   const [view, setView] = useState(false);
 
@@ -102,8 +105,17 @@ const FormComponent = () => {
   const onSubmit = (data) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     updateFormData(data);
-    window.location.replace("/income/f1099s");
+    navigate("/income/f1099s");
   };
+
+  useEffect(() => {
+    if (formData && Object.keys(formData).length > 0) {
+      setView(true);
+      setData(formData);
+    } else {
+      setView(false);
+    }
+  }, [formData]);
 
   return (
     <>
@@ -122,6 +134,10 @@ const FormComponent = () => {
                     className="form-input"
                     placeholder={label}
                     {...register(fieldName)}
+                    value={data[fieldName] || ""}
+                    onChange={(e) =>
+                      setData({ ...data, [fieldName]: e.target.value })
+                    }
                   />
                 </label>
               </div>
@@ -139,6 +155,10 @@ const FormComponent = () => {
                       type="checkbox"
                       className="form-checkbox"
                       {...register(identity)}
+                      value={data[foreignStatus] || ""}
+                      onChange={(e) =>
+                        setData({ ...data, [foreignStatus]: e.target.value })
+                      }
                     />
                     Identity
                   </label>
@@ -151,6 +171,10 @@ const FormComponent = () => {
                         type="checkbox"
                         className="form-checkbox"
                         {...register(foreignStatus)}
+                        value={data[foreignStatus] || ""}
+                        onChange={(e) =>
+                          setData({ ...data, [foreignStatus]: e.target.value })
+                        }
                       />
                       Foreign Status
                     </label>
@@ -180,6 +204,10 @@ const FormComponent = () => {
                     type="text"
                     className="form-input"
                     {...register(fieldName)}
+                    value={data[fieldName] || ""}
+                    onChange={(e) =>
+                      setData({ ...data, [fieldName]: e.target.value })
+                    }
                   />
                 </label>
               </div>

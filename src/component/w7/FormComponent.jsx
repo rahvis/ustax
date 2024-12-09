@@ -1,20 +1,23 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-misused-promises */
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { useFormContext } from "../FormContext"; // Import the context
 import "./FormComponent.css";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const FormComponent = () => {
   const { register, handleSubmit } = useForm();
-  const { updateFormData } = useFormContext(); // Use context API
+  const { formData, updateFormData } = useFormContext(); // Use context API
   const [view, setView] = useState(false);
+  const [data, setData] = useState({});
+
+  const navigate = useNavigate();
 
   const onSubmit = (data) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    updateFormData(data); // Update form data in context
-    window.location.replace("/income/w2COAsjobinfo");
+    updateFormData(data);
+    navigate("/income/w2COAsjobinfo");
   };
 
   const fieldMappings = {
@@ -63,6 +66,15 @@ const FormComponent = () => {
     signDateYear: "Signature Date (Year)",
   };
 
+  useEffect(() => {
+    if (formData && Object.keys(formData).length > 0) {
+      setView(true);
+      setData(formData);
+    } else {
+      setView(false);
+    }
+  }, [formData]);
+
   return (
     <>
       <h2>W7 Information</h2>
@@ -79,12 +91,20 @@ const FormComponent = () => {
                     type="date"
                     className="form-input"
                     {...register(fieldName)}
+                    value={data[fieldName] || ""}
+                    onChange={(e) =>
+                      setData({ ...data, [fieldName]: e.target.value })
+                    }
                   />
                 ) : (
                   <input
                     type="text"
                     className="form-input"
                     {...register(fieldName)}
+                    value={data[fieldName] || ""}
+                    onChange={(e) =>
+                      setData({ ...data, [fieldName]: e.target.value })
+                    }
                   />
                 )}
               </label>

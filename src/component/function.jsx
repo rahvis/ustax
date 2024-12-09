@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 
+import moment from "moment";
 import { PDFDocument } from "pdf-lib";
 
 export const generateW7Pdf = async (formData) => {
@@ -94,7 +95,7 @@ export const generateW7Pdf = async (formData) => {
       "city state and zip": formData.cityStateAndZip,
       "foreign street address": formData.foreignStreetAddress,
       "foreign city state and zip": formData.foreignCityStateAndZip,
-      "date of birth": formData.dateOfBirth,
+      "date of birth": moment(formData.dateOfBirth).format("mmddyyyy"),
       "country of birth": formData.countryOfBirth,
       "City and state or province": formData.cityAndStateOrProvince,
       "country(ies) of citizenship": formData.countriesOfCitizenship,
@@ -108,7 +109,7 @@ export const generateW7Pdf = async (formData) => {
       "other identification document details": formData.otherIdDetails,
       "issued by": formData.issuedBy,
       "document number": formData.documentNumber,
-      "expiration date": formData.documentExpirationDate,
+      "expiration date": moment(formData.documentExpirationDate).format("mmddyyyy"),
       "itin first 3": formData.itinFirst3,
       "itin next": formData.itinNext,
       "itin last": formData.itinLast,
@@ -118,7 +119,7 @@ export const generateW7Pdf = async (formData) => {
       "itin prev name": formData.itinPrevName,
       "itin prev middle": formData.itinPrevMiddle,
       "itin prev last": formData.itinPrevLast,
-      "us date of entry (mm/dd/yyyy)": formData.usDateOfEntry,
+      "us date of entry (mm/dd/yyyy)": moment(formData.usDateOfEntry).format("mmddyyyy"),
       "sign date mm": formData.signDateMM,
       "sign date dd": formData.signDateDD,
       "sign date year": formData.signDateYear,
